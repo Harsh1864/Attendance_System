@@ -1,0 +1,379 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    Layout = "_LoginLayout";
+}
+
+<style>
+    body {
+        background: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ff9500" fill-opacity="0.05" points="0,1000 1000,0 1000,1000"/></svg>');
+        z-index: 1;
+    }
+
+    .login-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        width: 100%;
+        max-width: 1200px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        animation: slideIn 0.8s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .left-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 60px;
+        background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+        color: white;
+        position: relative;
+    }
+
+    .left-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="%23ffffff" stroke-width="1" opacity="0.1"/></svg>');
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @@keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    .unique-image {
+        width: 250px;
+        height: 250px;
+        object-fit: cover;
+        margin-bottom: 30px;
+        transition: transform 0.3s ease;
+    }
+
+    .unique-image:hover {
+        transform: scale(1.05);
+    }
+
+    .left-section h2 {
+        font-size: 2.5em;
+        margin-bottom: 20px;
+        text-align: center;
+        background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .left-section p {
+        font-size: 1.2em;
+        text-align: center;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+
+    .right-section {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 60px;
+        background: rgba(255, 255, 255, 0.95);
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 40px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: none;
+    }
+
+    .login-card h3 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+        font-size: 2em;
+        font-weight: 300;
+    }
+
+    .k-form-field {
+        margin-bottom: 20px;
+    }
+
+    .k-form-field label {
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .k-textbox {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1em;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .k-textbox:focus {
+        border-color: #ff9500;
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+        outline: none;
+    }
+
+    .k-form-error {
+        color: #e74c3c;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .k-button {
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-size: 1em;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .k-button-solid-success {
+        background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+        color: white;
+    }
+
+    .k-button-solid-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 149, 0, 0.4);
+    }
+
+    .k-button-solid-base {
+        background: #f8f9fa;
+        color: #666;
+        border: 2px solid #e0e0e0;
+    }
+
+    .k-button-solid-base:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .register-link a {
+        color: #ff9500;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+
+    .register-link a:hover {
+        color: #ff6b35;
+    }
+
+    @@media (max-width: 768px) {
+        .login-content {
+            flex-direction: column;
+            margin: 20px;
+        }
+
+        .left-section, .right-section {
+            padding: 40px 20px;
+        }
+
+        .unique-image {
+            width: 200px;
+            height: 200px;
+        }
+    }
+</style>
+
+<!-- Login UI -->
+<div class="login-container">
+    <div class="login-content">
+        <!-- Left Side: Attendance Management Description with Image -->
+        <div class="left-section">
+            <img src="~/images/logo.png" alt="Attendance Management Logo" class="unique-image" />
+            <h2>Mark Before Death</h2>
+            <p>Revolutionize your attendance tracking with our cutting-edge management system. Ensure every presence is recorded accurately and efficiently because time waits for no one.</p>
+        </div>
+
+        <!-- Right Side: Modern Login Form -->
+        <div class="right-section">
+            <div class="login-card">
+                <h3>Sign In</h3>
+
+                <form id="loginform"></form>
+
+                <div class="register-link">
+                    <span>Don't have an account? </span>
+                    <a asp-action="Register">Create one</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://kendo.cdn.telerik.com/2023.2.829/js/kendo.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#loginform").kendoForm({
+                validatable: {
+                    validationOnBlur: true,
+                    validationSummary: false,
+                    errorTemplate: "<span class='k-form-error'>#: message #</span>"
+                },
+                items: [
+                    {
+                        field: "EmpMail",
+                        label: "Email Address:",
+                        validation: {
+                            required: { message: "Please enter email address." },
+                            email: { message: "Please enter a valid email address." }
+                        },
+                        editor: function (container, options) {
+                            $('<input type="email" id="EmpMail" name="' + options.field + '" required/>')
+                                .appendTo(container)
+                                .kendoTextBox({ placeholder: "Enter your email" });
+                        }
+                    },
+                    {
+                        field: "EmpPassword",
+                        label: "Password:",
+                        validation: { required: { message: "Please enter password." } },
+                        editor: function (container, options) {
+                            $('<input type="password" id="EmpPassword" name="' + options.field + '" required autocomplete="off"/>')
+                                .appendTo(container)
+                                .kendoTextBox({ placeholder: "Enter your password" });
+                        }
+                    }
+                ],
+                buttonsTemplate: `
+                    <div class="button-group">
+                        <button type="submit" class="k-button k-button-lg k-button-solid-success">Sign In</button>
+                        <button type="reset" class="k-button k-button-lg k-button-solid-base">Clear</button>
+                    </div>
+                `,
+                submit: function (e) {
+                    e.preventDefault();
+                    const LoginData = new FormData();
+                    LoginData.append("EmpMail", e.model.EmpMail);
+                    LoginData.append("EmpPassword", e.model.EmpPassword);
+
+                    $.ajax({
+                        method: "POST",
+                        url: "/Home/Logins",
+                        contentType: false,
+                        processData: false,
+                        data: LoginData,
+                        success: function (result) {
+                            if (result.success) {
+                                const role = result.role;
+                                const statuses = result.statuses;
+                                const ids = result.ids;
+                                sessionStorage.setItem("role", role);
+                                sessionStorage.setItem("email", $("#EmpMail").val());
+                                sessionStorage.setItem("empId", ids);
+
+                                if (role === "Employee" && statuses !== "Active") {
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Inactive Account',
+                                        text: 'Employee is inactive.',
+                                        confirmButtonColor: '#d33'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Login Successful!',
+                                        text: 'Welcome back!',
+                                        timer: 1500,
+                                        showConfirmButton: false
+                                    }).then(() => {
+                                        if (role === "Admin") {
+                                            window.location.href = "../admin/AdminDashboard";
+                                        } else if (role === "Employee" && statuses === "Active") {
+                                            window.location.href = `../EmployeeView/index/${ids}`;
+                                        } else {
+                                            window.location.href = "/home/index";
+                                        }
+                                    });
+                                }
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Login Failed',
+                                    text: result.message,
+                                    confirmButtonColor: '#d33'
+                                });
+                            }
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again.',
+                                confirmButtonColor: '#d33'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

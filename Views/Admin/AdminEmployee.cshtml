@@ -1,0 +1,609 @@
+@{
+    ViewData["Title"] = "Employee Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@Html.AntiForgeryToken()
+
+<style>
+    :root {
+        --primary-orange: #ff9500;
+        --dark-orange: #e08600;
+        --light-orange: #fff3e0;
+        --card-orange: #fffaf0;
+    }
+
+    .card-header.bg-success {
+        background: linear-gradient(90deg, #0d944d, #1ac57e);
+    }
+
+    .alert-info {
+        background-color: #e8f4fd;
+        border-left: 4px solid #17a2b8;
+        font-size: 0.9rem;
+    }
+
+    /* Page Title */
+    .page-title {
+        color: var(--primary-orange);
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(255, 149, 0, 0.1);
+        margin-bottom: 30px;
+    }
+
+    /* Button Container */
+    .button-container {
+        background: linear-gradient(135deg, #fffaf0 0%, #fff3e0 100%);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #ffd8b1;
+        margin-bottom: 25px;
+    }
+
+    /* Custom Button Styles */
+    .btn-status {
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .btn-active {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-active:hover {
+        background: linear-gradient(135deg, #218838 0%, #1e9e8a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-inactive {
+        background: transparent;
+        color: #dc3545;
+        border: 2px solid #dc3545;
+    }
+
+    .btn-inactive:hover {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-outline-active {
+        background: transparent;
+        color: #28a745;
+        border: 2px solid #28a745;
+    }
+
+    .btn-outline-active:hover {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+    }
+
+    .btn-outline-inactive {
+        background: transparent;
+        color: #dc3545;
+        border: 2px solid #dc3545;
+    }
+
+    /* Grid Container */
+    .grid-container {
+        background: white;
+        border-radius: 12px;
+        padding: 0;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid #ffd8b1;
+        overflow: hidden;
+    }
+
+    /* Kendo Grid Customization */
+    .k-grid-header {
+        background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%) !important;
+        color: white !important;
+    }
+
+    .k-grid-header .k-header {
+        background: transparent !important;
+        color: white !important;
+        font-weight: 600;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .k-grid-header .k-header>.k-link {
+        color: white !important;
+    }
+
+    .k-grid-content {
+        border-color: #ffd8b1;
+    }
+
+    .k-grid tr {
+        transition: background-color 0.3s ease;
+    }
+
+    .k-grid tr:hover {
+        background-color: #fffaf0 !important;
+    }
+
+    .k-grid tr.k-alt {
+        background-color: #fffaf0;
+    }
+
+    .k-grid td {
+        border-color: #ffd8b1;
+        padding: 12px 8px;
+    }
+
+    /* Toolbar Styling */
+    .k-grid-toolbar {
+        background: linear-gradient(135deg, #fffaf0 0%, #fff3e0 100%) !important;
+        border-bottom: 1px solid #ffd8b1;
+        padding: 12px 15px;
+    }
+
+    .k-grid-toolbar .k-button {
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .k-grid-toolbar .k-button.k-button-primary {
+        background: linear-gradient(135deg, #ff9500 0%, #e08600 100%);
+        border: none;
+        color: white;
+    }
+
+    .k-grid-toolbar .k-button.k-button-primary:hover {
+        background: linear-gradient(135deg, #e08600 0%, #cc7700 100%);
+    }
+
+    /* Pagination Styling */
+    .k-pager-wrap {
+        background: linear-gradient(135deg, #fffaf0 0%, #fff3e0 100%) !important;
+        border-top: 1px solid #ffd8b1;
+        color: var(--dark-orange);
+    }
+
+    .k-pager-numbers .k-state-selected {
+        background: linear-gradient(135deg, #ff9500 0%, #e08600 100%) !important;
+        border-color: var(--primary-orange);
+        color: white;
+    }
+
+    .k-pager-numbers .k-link {
+        color: var(--dark-orange);
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .status-active {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-inactive {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Profile Image */
+    .profile-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #ffd8b1;
+        transition: all 0.3s ease;
+    }
+
+    .profile-image:hover {
+        border-color: var(--primary-orange);
+        transform: scale(1.1);
+    }
+
+    /* Dialog Styling */
+    .k-dialog .k-dialog-titlebar {
+        background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%) !important;
+        color: white !important;
+    }
+
+    .k-dialog .k-dialog-title {
+        color: white !important;
+        font-weight: 600;
+    }
+
+    .k-dialog .k-content {
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* Form Styling */
+    .k-form-field .k-label {
+        color: var(--dark-orange);
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .k-textbox,
+    .k-dropdownlist {
+        border-radius: 6px;
+        border: 1px solid #ffd8b1;
+    }
+
+    .k-textbox:focus,
+    .k-dropdownlist:focus,
+    .k-dropdown .k-dropdown-wrap.k-state-focused {
+        border-color: var(--primary-orange);
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.2);
+    }
+
+    /* Loading Animation */
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 250, 240, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        border-radius: 12px;
+    }
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #ffd8b1;
+        border-top: 4px solid var(--primary-orange);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .button-container {
+            text-align: center;
+        }
+
+        .btn-status {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-bell-fill me-2"></i>Live Notifications</span>
+            <small id="lastUpdated" class="text-white-50"></small>
+        </div>
+        <div class="card-body" id="messageContainer" style="max-height: 250px; overflow-y: auto;">
+            <p class="text-muted">No messages yet...</p>
+        </div>
+    </div>
+    <h3 class="text-center mb-4 page-title"> Employee Management</h3>
+
+    <!-- 🔹 Status Filter Buttons -->
+    <div class="button-container text-center">
+        <button id="btnActive" class="btn-status btn-active me-3">
+            Active Employees
+        </button>
+        <button id="btnInactive" class="btn-status btn-outline-inactive">
+            Inactive Employees
+        </button>
+    </div>
+
+    <!-- 🔹 Grid Container -->
+    <div class="grid-container">
+        <div id="employeeGrid"></div>
+    </div>
+</div>
+@section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            var currentStatus = "Active";
+            var employeeGrid = null;
+            var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
+
+            // Toggle Buttons
+            $("#btnActive").click(function () {
+                if (currentStatus !== "Active") {
+                    currentStatus = "Active";
+                    $("#btnActive").addClass("btn-success").removeClass("btn-outline-success");
+                    $("#btnInactive").addClass("btn-outline-danger").removeClass("btn-danger");
+                    employeeGrid.dataSource.read();
+                }
+            });
+
+            $("#btnInactive").click(function () {
+                if (currentStatus !== "Inactive") {
+                    currentStatus = "Inactive";
+                    $("#btnInactive").addClass("btn-danger").removeClass("btn-outline-danger");
+                    $("#btnActive").addClass("btn-outline-success").removeClass("btn-success");
+                    employeeGrid.dataSource.read();
+                }
+            });
+
+            // Initialize Kendo Grid
+            employeeGrid = $("#employeeGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/Admin/GetEmployeesByStatus",
+                            dataType: "json",
+                            data: function () { return { status: currentStatus }; }
+                        }
+                    },
+                    schema: {
+                        model: {
+                            id: "empId",
+                            fields: {
+                                empId: { type: "number" },
+                                empName: { type: "string" },
+                                empMail: { type: "string" },
+                                gender: { type: "string" },
+                                status: { type: "string" },
+                                profile: { type: "string" }
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                height: 550,
+                sortable: true,
+                pageable: { refresh: true, pageSizes: true, buttonCount: 5 },
+                filterable: true,
+                columnMenu: true,
+                reorderable: true,
+                resizable: true,
+                toolbar: ["pdf", "search"],
+                pdf: {
+                    allPages: true,
+                    avoidLinks: true,
+                    paperSize: "A4",
+                    landscape: true,
+                    repeatHeaders: true,
+                    scale: 0.65,
+                    margin: { top: "1cm", left: "1cm", right: "1cm", bottom: "1cm" },
+                    fileName: "Employees_List.pdf",
+                    forceProxy: false,
+                    proxyURL: "",
+                    template: $("#page-template").html(),
+                    export: function (e) {
+
+                        e.sender.showColumn("empId");
+                        e.sender.showColumn("empName");
+                        e.sender.showColumn("empMail");
+                        e.sender.showColumn("gender");
+                        e.sender.showColumn("status");
+                    }
+                },
+
+
+                columns: [
+                    { field: "empId", title: "ID", width: "70px" },
+                    {
+                        field: "profile",
+                        title: "Profile",
+                        width: "90px",
+                        template: function (dataItem) {
+                            if (dataItem.profile) {
+                                return `<img src="/employee_images/${dataItem.profile}?v=${new Date().getTime()}" width="50" height="50" style="border-radius:50%;object-fit:cover;">`;
+                            } else {
+                                return "<span style='color:gray;'>No Image</span>";
+                            }
+                        }
+                    },
+                    { field: "empName", title: "Name", width: "180px" },
+                    { field: "empMail", title: "Email", width: "220px" },
+                    { field: "gender", title: "Gender", width: "100px" },
+                    {
+                        field: "status",
+                        title: "Status",
+                        width: "100px",
+                        template: function (dataItem) {
+                            var color = dataItem.status === 'Active' ? 'green' : 'red';
+                            return `<span style="color:${color};font-weight:bold;">${dataItem.status}</span>`;
+                        }
+                    },
+                    {
+                        command: [{
+                            name: "edit",
+                            text: "Edit",
+                            click: function (e) {
+                                e.preventDefault();
+                                var tr = $(e.target).closest("tr");
+                                var dataItem = employeeGrid.dataItem(tr);
+
+                                $.get("/Admin/GetEmployeeDetail", { empId: dataItem.empId })
+                                    .done(function (emp) {
+                                        if (!emp) { Swal.fire("Error", "Employee not found!", "error"); return; }
+
+                                        var imageSrc = emp.profile
+                                            ? `/employee_images/${emp.profile}?v=${new Date().getTime()}`
+                                            : "/employee_images/no-image.png";
+
+                                        $("#editEmployeeDialog").remove();
+                                        var dialogContainer = $("<div id='editEmployeeDialog'></div>").appendTo("body");
+
+                                        dialogContainer.html(`
+                                                <form id="editEmployeeForm" enctype="multipart/form-data">
+                                                    <div class="k-form-field">
+                                                        <label class="k-label">Name</label>
+                                                        <input type="text" id="empName" name="empName" class="k-textbox" value="${emp.empName || ''}" style="width:100%;" required />
+                                                    </div>
+                                                    <div class="k-form-field" style="margin-top:15px;">
+                                                        <label class="k-label">Email</label>
+                                                        <input type="email" id="empMail" name="empMail" class="k-textbox" value="${emp.empMail || ''}" style="width:100%;" readonly />
+                                                    </div>
+                                                    <div class="k-form-field" style="margin-top:15px;">
+                                                        <label class="k-label">Gender</label>
+                                                        <select id="gender" name="gender" style="width:100%;">
+                                                            <option value="Male" ${emp.gender === 'Male' ? 'selected' : ''}>Male</option>
+                                                            <option value="Female" ${emp.gender === 'Female' ? 'selected' : ''}>Female</option>
+                                                            <option value="Other" ${emp.gender === 'Other' ? 'selected' : ''}>Other</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="k-form-field" style="margin-top:15px;">
+                                                        <label class="k-label">Status</label>
+                                                        <select id="status" name="status" style="width:100%;">
+                                                            <option value="Active" ${emp.status === 'Active' ? 'selected' : ''}>Active</option>
+                                                            <option value="Inactive" ${emp.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="k-form-field" style="margin-top:15px;">
+                                                        <label class="k-label">Profile Picture</label>
+                                                        <input type="file" id="profile" name="profile" accept="image/*" style="width:100%;" />
+                                                        <img id="previewProfile" src="${imageSrc}" style="width:100px;height:100px;border-radius:50%;display:block;margin-top:10px;object-fit:cover;"/>
+                                                    </div>
+                                                    <div class="k-form-buttons" style="margin-top:20px;text-align:right;">
+                                                        <button type="button" class="k-button k-primary" id="saveEmployeeBtn">Save</button>
+                                                        <button type="button" class="k-button" id="cancelEmployeeBtn">Cancel</button>
+                                                    </div>
+                                                </form>
+                                            `);
+
+                                        $("#gender").kendoDropDownList();
+                                        $("#status").kendoDropDownList();
+
+                                        $("#profile").on("change", function (e) {
+                                            const file = e.target.files[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onload = function (ev) {
+                                                    $("#previewProfile").attr("src", ev.target.result);
+                                                };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        });
+
+                                        var kDialog = dialogContainer.kendoDialog({
+                                            width: "500px",
+                                            title: "Edit Employee - " + emp.empName,
+                                            closable: true,
+                                            modal: true,
+                                            actions: []
+                                        }).data("kendoDialog");
+
+                                        $("#saveEmployeeBtn").off("click").on("click", function () {
+                                            var empName = $("#empName").val().trim();
+                                            if (!empName) { Swal.fire("Error", "Name is required!", "error"); return; }
+
+                                            var updatedData = new FormData();
+                                            updatedData.append("empId", emp.empId);
+                                            updatedData.append("empName", empName);
+                                            updatedData.append("gender", $("#gender").data("kendoDropDownList").value());
+                                            updatedData.append("status", $("#status").data("kendoDropDownList").value());
+                                            var file = $("#profile")[0].files[0];
+                                            if (file) updatedData.append("profile", file);
+
+                                            $.ajax({
+                                                url: "/Admin/UpdateEmployeeDetails",
+                                                type: "POST",
+                                                data: updatedData,
+                                                processData: false,
+                                                contentType: false,
+                                                headers: { "RequestVerificationToken": antiForgeryToken },
+                                                success: function (res) {
+                                                    if (res && res.success) {
+                                                        Swal.fire({
+                                                            icon: "success",
+                                                            title: "Updated!",
+                                                            text: "Employee details saved.",
+                                                            showConfirmButton: false,
+                                                            timer: 1500
+                                                        });
+                                                        employeeGrid.dataSource.read();
+                                                        kDialog.close();
+                                                    } else {
+                                                        Swal.fire("Error", res.message || "Update failed!", "error");
+                                                    }
+                                                },
+                                                error: function () { Swal.fire("Error", "Server error occurred!", "error"); }
+                                            });
+                                        });
+
+                                        $("#cancelEmployeeBtn").off("click").on("click", function () { kDialog.close(); });
+
+                                        kDialog.open();
+                                    })
+                                    .fail(function () { Swal.fire("Error", "Failed to load employee details!", "error"); });
+                            }
+                        }],
+                        title: "Actions",
+                        width: "120px"
+                    }
+                ]
+            }).data("kendoGrid");
+
+            employeeGrid.dataSource.read();
+        });
+
+        function loadMessages() {
+            $.ajax({
+                url: '/Admin/GetMessages',
+                type: 'GET',
+                success: function (response) {
+                    const container = $('#messageContainer');
+                    const timeLabel = $('#lastUpdated');
+                    const now = new Date().toLocaleTimeString();
+
+                    timeLabel.text("Updated: " + now);
+
+                    if (!response.success) return;
+
+                    container.empty();
+
+                    if (response.messages.length === 0) {
+                        container.append('<p class="text-muted">No new messages.</p>');
+                        return;
+                    }
+
+                    response.messages.forEach(msg => {
+                        container.append(`
+                        <div class="alert alert-info mb-2 p-2">
+                            <i class="bi bi-info-circle-fill text-primary me-1"></i>
+                            ${msg}
+                        </div>
+                    `);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading messages:', error);
+                }
+            });
+        }
+
+        // ✅ Auto-refresh every 5 seconds
+        setInterval(loadMessages, 5000);
+        $(document).ready(loadMessages);
+    </script>
+}

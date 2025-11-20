@@ -1,0 +1,272 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AttendanceProject</title>
+
+    <!-- Bootstrap + Kendo CSS (Kendo before your site.css helps override cleanly) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/AttendanceProject.styles.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
+
+    <style>
+        :root {
+            --primary-orange: #ff9500;
+            --dark-orange: #e08600;
+            --light-orange: #fff3e0;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* main area will scroll */
+        }
+
+        header {
+            height: 50px;
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+            border-bottom: 1px solid #ff9500;
+        }
+
+        #layout-container {
+            display: flex;
+            height: calc(100vh - 50px); /* full height minus header */
+        }
+
+        #drawer {
+            height: 100%;
+            border-right: 1px solid #ffd8b1;
+            background-color: white;
+            
+        }
+
+        #main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto; /* content scrolls here */
+            background-color: #f8f9fa;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            background: #fffaf0;
+            border-top: 1px solid #ffd8b1;
+            color: #666;
+        }
+
+        /* Drawer item styling */
+        .k-drawer-items li {
+            display: flex;
+            align-items: center;
+            padding: 10px 5px;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            margin: 2px 3px;
+            cursor: pointer;
+        }
+        .k-drawer-items li:hover {
+            background-color: #fff3e0;
+            color: #ff9500;
+        }
+        .k-drawer-items li.k-selected {
+            background-color: #ff9500;
+            color: white;
+        }
+        .k-drawer-items .k-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .k-toolbar {
+            background: transparent;
+            border: none;
+        }
+
+        .k-toolbar h4 {
+            margin: 0;
+            padding-left: 1rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .k-button.k-flat {
+            background: #ff9500;
+            color: white !important;
+        }
+
+        .k-button.k-flat:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        #liveClock {
+            font-weight: 600;
+            margin-right: .75rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        /* Kendo overrides for orange theme */
+        .k-drawer .k-drawer-items .k-selected {
+            background-color: #ff9500;
+            color: white;
+        }
+
+        .k-drawer .k-drawer-items .k-selected .k-icon {
+            color: white;
+        }
+
+        .k-drawer .k-drawer-items li:hover .k-icon {
+            color: #ff9500;
+        }
+
+        .k-drawer .k-drawer-items .k-selected:hover {
+            background-color: #e08600;
+        }
+    </style>
+</head>
+
+<body>
+    <header style="background-color: #e08600;">
+        <div id="toolbar"></div>
+    </header>
+
+    <div id="layout-container">
+        <div id="drawer"></div>
+
+        <div id="main-content" class="container-fluid">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <footer class="border-top text-muted">
+        &copy; 2025 - AttendanceProject -
+        <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #ff9500;">Privacy</a>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/kendo/kendo.all.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            const empId = sessionStorage.getItem("empId");
+            const homeUrl = empId ? `/EmployeeView/Index/${empId}` : "/Home/Index";
+            
+            const currentPath = window.location.pathname;
+            let activeKey = 'Home';
+            
+            if (currentPath.includes('/Profile')) {
+                activeKey = 'Profile';
+            }
+
+            $("#drawer").kendoDrawer({
+                template: `
+                    <ul class='k-drawer-items'>
+                        <li data-role='drawer-item' class='${activeKey === 'Home' ? 'k-selected' : ''}' data-key='Home'>
+                            <span class='k-icon k-i-home'></span>
+                            <span class='k-item-text'>Home</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeKey === 'Profile' ? 'k-selected' : ''}' data-key='Profile'>
+                            <span class='k-icon k-i-user'></span>
+                            <span class='k-item-text'>Profile</span>
+                        </li>
+                        @* <li data-role='drawer-item' data-key='Logout'>
+                            <span class='k-icon k-i-logout'></span>
+                            <span class='k-item-text'>Logout</span>
+                        </li> *@
+                    </ul> 
+                `,
+                mode: "push",
+                mini: true,
+                position: "left",
+                minHeight: "100%",
+                itemClick: function (e) {
+                    const key = $(e.item).data("key");
+                    switch (key) {
+                        case "Home":
+                            window.location.href = homeUrl;
+                            break;
+                        case "Profile":
+                            window.location.href = '/Profile/Index';
+                            break;
+                        @* case "Logout":
+                            window.location.href = '/Home/Logout';
+                            break; *@
+                    }
+                }
+            });
+
+            function toggleDrawer() {
+                const drawer = $("#drawer").data("kendoDrawer");
+                const container = drawer.drawerContainer;
+                if (container.hasClass("k-drawer-expanded")) drawer.hide();
+                else drawer.show();
+            }
+
+            $("#toolbar").kendoToolBar({
+                items: [
+                    {
+                        type: "button",
+                        icon: "menu",
+                        attributes: { class: "k-flat" },
+                        click: toggleDrawer
+                    },
+                    { template: "<h4>AttendanceProject</h4>" },
+                    { type: "spacer" },
+                    { template: "<span id='liveClock' class='text-primary'></span>" },
+                    {
+                        template: `
+                            <button class="logout-btn" onclick="window.location.href='/Home/Logout'">
+                                <span class="k-icon k-i-logout"></span> Logout
+                            </button>
+                        `
+                    }
+                ]
+            });
+
+            function updateClock() {
+                const now = new Date();
+                const time = kendo.toString(now, "hh:mm:ss tt");
+                const date = kendo.toString(now, "dddd, MMMM dd, yyyy");
+                $("#liveClock").text(`${date} ${time}`);
+            }
+            updateClock();
+            setInterval(updateClock, 1000);
+        });
+    </script>
+</body>
+</html>

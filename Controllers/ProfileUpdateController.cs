@@ -1,0 +1,96 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using project.Models;
+using try_project_casepoint.Services;
+
+namespace try_project_casepoint.Controllers
+{
+    public class ProfileUpdateController : Controller
+    {
+        private readonly ILogger<ProfileUpdateController> _logger;
+
+        private readonly ProfileUpdateService _profileupdateservice;
+
+        public ProfileUpdateController(ILogger<ProfileUpdateController> logger, ProfileUpdateService profileuservice)
+        {
+            _profileupdateservice = profileuservice;
+            _logger = logger;
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> UpdateProfile()
+        {
+            //   int? empId = HttpContext.Session.GetInt32("EmpID");
+            //   if (empId == null) return RedirectToAction("Login");
+
+            var sessionEmpId = Convert.ToInt32(HttpContext.Session.GetString("Ids"));
+              var user = await _profileupdateservice.GetEmployeeById(sessionEmpId);
+            return View(user);
+            
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile([FromForm] EmployeeModel employee)
+        {
+            try
+            {
+                // int? empId = HttpContext.Session.GetInt32("EmpID");
+                // if (empId == null) return RedirectToAction("Login");
+
+                // Prevent password change
+                employee.EmpPassword = null;
+
+                await _profileupdateservice.UpdateProfile(employee);
+
+                return Json(new { success = true, message = "Profile updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                // Send error message back to AJAX
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public IActionResult UpdatePassword()
+        {
+            //if (HttpContext.Session.GetInt32("EmpID") == null) 
+              //  return RedirectToAction("Login");
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePassword(string oldPassword, string newPassword)
+        {
+            try
+            {
+                //int? empId = HttpContext.Session.GetInt32("EmpID");
+                //if (empId == null) return RedirectToAction("Login");
+                var sessionEmpId = Convert.ToInt32(HttpContext.Session.GetString("Ids"));
+                var user = await _profileupdateservice.GetEmployeeById(sessionEmpId); // Use actual empId here
+
+                if (user.EmpPassword != oldPassword)
+                {
+                    return Json(new { success = false, message = "Old password is incorrect!" });
+                }
+                
+                await _profileupdateservice.UpdatePassword(sessionEmpId, newPassword); // Use actual empId here
+                return Json(new { success = true, message = "Password updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+    }
+}

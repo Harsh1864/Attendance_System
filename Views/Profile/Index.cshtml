@@ -1,0 +1,441 @@
+@model project.Models.EmployeeModel
+
+@{
+    ViewData["Title"] = "Employee Profile";
+    Layout = "../Shared/_EmployeeLayout.cshtml";
+
+    // ✅ Determine photo URL (default if null or empty)
+    var profileImagePath = string.IsNullOrEmpty(Model.Profile)
+        ? Url.Content("~/images/default.png")   // default photo
+        : Url.Content("~/profiles/" + Model.Profile); // user photo
+
+    Console.WriteLine(profileImagePath);
+}
+
+
+
+<style>
+    :root {
+        --primary-color: #ff9500;
+        --primary-gradient: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --border-radius: 16px;
+        --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+
+    .profile-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 90vh;
+        padding: 20px ;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 20px 30px;
+        width: 100%;
+        max-width: 480px;
+        position: relative;
+        transition: var(--transition);
+        border: none;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .profile-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin-bottom: 25px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .profile-image-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .profile-image {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #fff;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: var(--transition);
+    }
+
+    .profile-image:hover {
+        transform: scale(1.05);
+    }
+
+    .image-upload-btn {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary-gradient);
+        color: white;
+        border: 3px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 3px 10px rgba(255, 149, 0, 0.3);
+    }
+
+    .image-upload-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(255, 149, 0, 0.4);
+    }
+
+    .employee-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 15px 0 5px;
+    }
+
+    .employee-email {
+        color: var(--secondary-color);
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    .profile-details {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: var(--dark-color);
+    }
+
+    .status-active {
+        color: var(--success-color);
+    }
+
+    .status-inactive {
+        color: var(--secondary-color);
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .action-btn {
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: 0.95rem;
+        border: none;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 140px;
+        justify-content: center;
+    }
+
+    .edit-btn {
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .edit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 149, 0, 0.4);
+    }
+
+    .password-btn {
+        background: #f8f9fa;
+        color: var(--dark-color);
+        border: 2px solid #e0e0e0;
+    }
+
+    .password-btn:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+    }
+
+    .floating-buttons {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .icon-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: var(--transition);
+        background: #f8f9fa;
+        color: var(--dark-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-btn:hover {
+        transform: scale(1.1);
+        background: var(--primary-gradient);
+        color: white;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 576px) {
+        .profile-card {
+            padding: 30px 20px 20px;
+            margin: 10px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .floating-buttons {
+            position: static;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <!-- Floating Action Buttons -->
+        
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <h2 class="profile-title">Employee Profile</h2>
+            
+            <div class="profile-image-container">
+                <img id="profileImage" src="@profileImagePath"
+                     onerror="this.onerror=null;this.src='/images/default.png';"
+                     alt="Profile Picture" class="profile-image">
+                
+                <div id="plusBtn" class="image-upload-btn" title="Update Photo">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*" />
+            </div>
+
+            <h3 class="employee-name">@Model.EmpName</h3>
+            <p class="employee-email">@Model.EmpMail</p>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="profile-details">
+            <div class="detail-item">
+                <span class="detail-label">
+                    <i class="fas fa-venus-mars" style="color: #ff9500;"></i> Gender
+                </span>
+                <span class="detail-value">@Model.Gender</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">
+                    <i class="fas fa-circle" style="color: #28a745;"></i> Status
+                </span>
+                <span class="detail-value @(Model.Status == "Active" ? "status-active" : "status-inactive")">
+                    @Model.Status
+                </span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">
+                    <i class="fas fa-user-tag" style="color: #007bff;"></i> Role
+                </span>
+                <span class="detail-value">@Model.Role</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button id="editProfileBtn" class="action-btn edit-btn">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+            <button id="changePasswordBtn" class="action-btn password-btn">
+                <i class="fas fa-key"></i> Change Password
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize Kendo Buttons with custom styling
+            $("#editProfileBtn").kendoButton({
+                themeColor: "primary"
+            });
+
+            $("#changePasswordBtn").kendoButton({
+                themeColor: "base"
+            });
+
+            // ✅ Upload profile photo
+            $("#plusBtn").on("click", function () {
+                $("#fileInput").click();
+            });
+
+            $("#fileInput").on("change", function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file type
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!allowedTypes.includes(file.type)) {
+                        Swal.fire({
+                            title: 'Invalid File Type',
+                            text: 'Please select a valid image file (JPEG, PNG, GIF).',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+
+                    // Validate file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        Swal.fire({
+                            title: 'File Too Large',
+                            text: 'Please select an image smaller than 5MB.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    const formData = new FormData();
+                    formData.append("ContactPicture", file);
+                    formData.append("EmpMail", '@Model.EmpMail');
+
+                    // Show loading state
+                    $("#plusBtn").html('<i class="fas fa-spinner fa-spin"></i>');
+
+                    $.ajax({
+                        url: "/Profile/Index2",
+                        type: "POST",
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (result) {
+                            Swal.fire({
+                                title: 'Success!',
+                                text: result.message || 'Your profile picture was updated successfully.',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#ff9500'
+                            });
+
+                            // Update preview immediately
+                            reader.onload = function (ev) {
+                                $("#profileImage").attr("src", ev.target.result);
+                            };
+                            reader.readAsDataURL(file);
+                        },
+                        error: function (error) {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: error.responseJSON?.message || 'Something went wrong while updating the profile picture.',
+                                icon: 'error',
+                                confirmButtonText: 'Try Again',
+                                confirmButtonColor: '#d33'
+                            });
+                        },
+                        complete: function () {
+                            // Reset button state
+                            $("#plusBtn").html('<i class="fas fa-camera"></i>');
+                            $("#fileInput").val('');
+                        }
+                    });
+                }
+            });
+
+            // ✏️ Redirect to Edit Page
+            $("#editBtn, #editProfileBtn").on("click", function () {
+                window.location.href = "/ProfileUpdate/UpdateProfile";
+            });
+
+            // 🔒 Redirect to Change Password Page
+            $("#passwordBtn, #changePasswordBtn").on("click", function () {
+                window.location.href = "/ProfileUpdate/UpdatePassword";
+            });
+        });
+    </script>
+}

@@ -1,0 +1,401 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\project.bundle.scp.css",
+      "PackagePath": "staticwebassets\\project.bundle.scp.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\css\\site.css",
+      "PackagePath": "staticwebassets\\css\\site.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\02d306a9-8c42-4d25-819b-cbefaf847c42_gujarat.jpeg",
+      "PackagePath": "staticwebassets\\employee_images\\02d306a9-8c42-4d25-819b-cbefaf847c42_gujarat.jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\180ed563-8fb9-48bb-bb13-416a4d353357_1334108.jpeg",
+      "PackagePath": "staticwebassets\\employee_images\\180ed563-8fb9-48bb-bb13-416a4d353357_1334108.jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\1895b6db-be18-4b19-91ef-c096c6bb8264_gujarat.jpeg",
+      "PackagePath": "staticwebassets\\employee_images\\1895b6db-be18-4b19-91ef-c096c6bb8264_gujarat.jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\22bf125f-37bf-4ed1-ba10-77710c35b453_1334108.jpeg",
+      "PackagePath": "staticwebassets\\employee_images\\22bf125f-37bf-4ed1-ba10-77710c35b453_1334108.jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\23c32b68-5ef6-49f7-a53c-c7e0c7f3ed55_DESTINY_sci_fi_shooter_fps_action_fighting_futuristic_warrior_rpg_mmo_online_artwork_poster_j_2560x1440.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\23c32b68-5ef6-49f7-a53c-c7e0c7f3ed55_DESTINY_sci_fi_shooter_fps_action_fighting_futuristic_warrior_rpg_mmo_online_artwork_poster_j_2560x1440.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\36825a19-9274-4885-b56b-3e0e4c12616c_Punjab.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\36825a19-9274-4885-b56b-3e0e4c12616c_Punjab.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\372e0f1c-6712-4dd7-b479-7c25e5381030_Screenshot 2025-08-19 170526.png",
+      "PackagePath": "staticwebassets\\employee_images\\372e0f1c-6712-4dd7-b479-7c25e5381030_Screenshot 2025-08-19 170526.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\41474de4-6043-4ff8-9e9d-52c9f06a3b4b_Punjab.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\41474de4-6043-4ff8-9e9d-52c9f06a3b4b_Punjab.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\4214554b-72b3-4715-a1d8-ba6994557848_akame.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\4214554b-72b3-4715-a1d8-ba6994557848_akame.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\4973665e-7af5-4236-9f91-6ce5027e99f4_Punjab.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\4973665e-7af5-4236-9f91-6ce5027e99f4_Punjab.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\4ac919c1-dcc4-40ce-a9bb-ced21832e2d2_Punjab.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\4ac919c1-dcc4-40ce-a9bb-ced21832e2d2_Punjab.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\4dd7e3b5-4c1a-48fd-96d1-9f946b0128fa_1334108.jpeg",
+      "PackagePath": "staticwebassets\\employee_images\\4dd7e3b5-4c1a-48fd-96d1-9f946b0128fa_1334108.jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\69570931-1412-4d72-9f30-2f1fdf980a86_akame.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\69570931-1412-4d72-9f30-2f1fdf980a86_akame.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\80e62d12-89ae-4ac9-9ca0-204f472f666c_Punjab.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\80e62d12-89ae-4ac9-9ca0-204f472f666c_Punjab.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\8e1248c1-ab89-4338-808b-32681f6bcc8f_Screenshot 2025-08-19 170543.png",
+      "PackagePath": "staticwebassets\\employee_images\\8e1248c1-ab89-4338-808b-32681f6bcc8f_Screenshot 2025-08-19 170543.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\9bae7524-5736-42da-8541-37b7bc20e483_gujarat.jpeg",
+      "PackagePath": "staticwebassets\\employee_images\\9bae7524-5736-42da-8541-37b7bc20e483_gujarat.jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\a1127524-9a97-4dd3-ada8-2684f1052c47_Screenshot 2025-09-02 105954.png",
+      "PackagePath": "staticwebassets\\employee_images\\a1127524-9a97-4dd3-ada8-2684f1052c47_Screenshot 2025-09-02 105954.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\a43080d1-92c1-4811-a906-e7baa345db3b_akame.jpg",
+      "PackagePath": "staticwebassets\\employee_images\\a43080d1-92c1-4811-a906-e7baa345db3b_akame.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\employee_images\\e30330ff-0a98-4671-958e-b1df1110eec1_1334108.jpeg",
+      "PackagePath": "staticwebassets\\employee_images\\e30330ff-0a98-4671-958e-b1df1110eec1_1334108.jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\favicon.ico",
+      "PackagePath": "staticwebassets\\favicon.ico"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\images\\default.png",
+      "PackagePath": "staticwebassets\\images\\default.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\images\\image.png",
+      "PackagePath": "staticwebassets\\images\\image.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\images\\loading.gif",
+      "PackagePath": "staticwebassets\\images\\loading.gif"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\images\\logo.png",
+      "PackagePath": "staticwebassets\\images\\logo.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\js\\site.js",
+      "PackagePath": "staticwebassets\\js\\site.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "PackagePath": "staticwebassets\\lib\\bootstrap"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\LICENSE.md"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "PackagePath": "staticwebassets\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\kendo\\kendo.all.min.js",
+      "PackagePath": "staticwebassets\\lib\\kendo\\kendo.all.min.js"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\lib\\kendo\\kendo.default-v2.min.css",
+      "PackagePath": "staticwebassets\\lib\\kendo\\kendo.default-v2.min.css"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\70d00581-e7dc-42bf-b5e7-857c8bb5f442_download (1).jpeg",
+      "PackagePath": "staticwebassets\\profiles\\70d00581-e7dc-42bf-b5e7-857c8bb5f442_download (1).jpeg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\Krish@gmail.com.png",
+      "PackagePath": "staticwebassets\\profiles\\Krish@gmail.com.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\aarav.mehta@example.com.png",
+      "PackagePath": "staticwebassets\\profiles\\aarav.mehta@example.com.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\avni@a.com.jpg",
+      "PackagePath": "staticwebassets\\profiles\\avni@a.com.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\he@gmail.com.png",
+      "PackagePath": "staticwebassets\\profiles\\he@gmail.com.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\priya@company.com.png",
+      "PackagePath": "staticwebassets\\profiles\\priya@company.com.png"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\ravi@company.com.jpg",
+      "PackagePath": "staticwebassets\\profiles\\ravi@company.com.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\sneha.kapoor@example.com.jpg",
+      "PackagePath": "staticwebassets\\profiles\\sneha.kapoor@example.com.jpg"
+    },
+    {
+      "Id": "C:\\CasePoint\\InternShip\\try_project_casepoint\\wwwroot\\profiles\\ve@gmail.com.png",
+      "PackagePath": "staticwebassets\\profiles\\ve@gmail.com.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.project.props",
+      "PackagePath": "build\\project.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.project.props",
+      "PackagePath": "buildMultiTargeting\\project.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.project.props",
+      "PackagePath": "buildTransitive\\project.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.project.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

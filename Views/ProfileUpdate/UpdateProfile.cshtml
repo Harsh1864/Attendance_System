@@ -1,0 +1,453 @@
+@using project.Models
+@model EmployeeModel
+
+@{
+    ViewData["Title"] = "Update Profile";
+    Layout = "../Shared/_EmployeeLayout.cshtml";
+}
+
+@* <!-- Kendo CSS/JS -->
+<link href="@Url.Content("~/lib/kendo/kendo.default-v2.min.css")" rel="stylesheet" />
+<script src="@Url.Content("~/lib/kendo/kendo.all.min.js")"></script>
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" /> *@
+
+<style>
+    :root {
+        --primary-color: #ff9500;
+        --primary-gradient: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+        --secondary-color: #6c757d;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --border-radius: 16px;
+        --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+
+    .profile-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 40px 35px 35px;
+        width: 100%;
+        max-width: 450px;
+        position: relative;
+        transition: var(--transition);
+        border: none;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: var(--secondary-color);
+        cursor: pointer;
+        transition: var(--transition);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .close-btn:hover {
+        background: #f8f9fa;
+        color: var(--dark-color);
+        transform: scale(1.1);
+    }
+
+    .card-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .card-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--dark-color);
+        margin: 0 0 10px 0;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-subtitle {
+        color: var(--secondary-color);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 500;
+        color: var(--dark-color);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-label i {
+        color: var(--primary-color);
+        width: 16px;
+    }
+
+    .profile-input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: var(--transition);
+        background: white;
+    }
+
+    .profile-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+        outline: none;
+    }
+
+    .profile-input.k-state-focused {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+    }
+
+    .error-message {
+        color: var(--danger-color);
+        font-size: 0.85rem;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .error-message i {
+        font-size: 0.8rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 15px;
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 15px rgba(255, 149, 0, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    /* Gender Options Styling */
+    .gender-options {
+        display: flex;
+        gap: 20px;
+        margin-top: 8px;
+    }
+
+    .gender-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: var(--transition);
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .gender-option:hover {
+        background: #e9ecef;
+    }
+
+    .gender-option.selected {
+        border-color: var(--primary-color);
+        background: rgba(255, 149, 0, 0.1);
+    }
+
+    .gender-option input[type="radio"] {
+        margin: 0;
+    }
+
+    .gender-label {
+        font-weight: 500;
+        color: var(--dark-color);
+        cursor: pointer;
+    }
+
+    /* Kendo Overrides */
+    .k-textbox {
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        transition: var(--transition);
+    }
+
+    .k-textbox:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+    }
+
+    .k-button {
+        border-radius: 10px;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 576px) {
+        .profile-card {
+            padding: 30px 25px 25px;
+            margin: 10px;
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+        }
+
+        .gender-options {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+    /* Loading State */
+    .submit-btn.loading {
+        pointer-events: none;
+        opacity: 0.8;
+    }
+
+    .submit-btn.loading i {
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-card">
+        <!-- Close Button -->
+        <button id="closeCard" class="close-btn" title="Close">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Card Header -->
+        <div class="card-header">
+            <h2 class="card-title">Update Profile</h2>
+            <p class="card-subtitle">Manage your personal information</p>
+        </div>
+
+        <!-- Profile Form -->
+        <form id="userform">
+            <!-- Hidden Employee ID -->
+            <input type="hidden" id="txtId" name="EmpId" value="@Model.EmpId" />
+
+            <!-- Name -->
+            <div class="form-group">
+                <label for="txtName" class="form-label">
+                    <i class="fas fa-user"></i> Full Name
+                </label>
+                <input type="text" id="txtName" name="EmpName" value="@Model.EmpName" class="profile-input" />
+                <span id="errName" class="error-message"></span>
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-venus-mars"></i> Gender
+                </label>
+                <div class="gender-options">
+                    <label class="gender-option @(Model.Gender=="Male" ? "selected" : "")" for="genderMale">
+                        <input type="radio" id="genderMale" name="Gender" value="Male" @(Model.Gender=="Male" ? "checked" : "") />
+                        <span class="gender-label">Male</span>
+                    </label>
+                    <label class="gender-option @(Model.Gender=="Female" ? "selected" : "")" for="genderFemale">
+                        <input type="radio" id="genderFemale" name="Gender" value="Female" @(Model.Gender=="Female" ? "checked" : "") />
+                        <span class="gender-label">Female</span>
+                    </label>
+                    <label class="gender-option @(Model.Gender=="Other" ? "selected" : "")" for="genderOther">
+                        <input type="radio" id="genderOther" name="Gender" value="Other" @(Model.Gender=="Other" ? "checked" : "") />
+                        <span class="gender-label">Other</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="button" id="btnSubmit" class="submit-btn">
+                <i class="fas fa-user-edit"></i> Update Profile
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function () {
+            // Close button functionality
+            $("#closeCard").click(function () {
+                window.location.href = '/Profile/Index';
+            });
+
+            // Initialize Kendo UI components
+            $("#txtName").kendoTextBox({ 
+                placeholder: "Enter your full name",
+                change: function() {
+                    $("#errName").text("");
+                }
+            });
+
+            // Initialize Kendo Radio Buttons
+            $("#genderMale").kendoRadioButton();
+            $("#genderFemale").kendoRadioButton();
+            $("#genderOther").kendoRadioButton();
+
+            // Initialize Kendo Button
+            $("#btnSubmit").kendoButton();
+
+            // Gender selection styling
+            $(".gender-option").click(function() {
+                $(".gender-option").removeClass("selected");
+                $(this).addClass("selected");
+                $(this).find('input[type="radio"]').prop("checked", true);
+            });
+
+            // Submit logic
+            $("#btnSubmit").click(function () {
+                var name = $("#txtName").val();
+                var gender = $("input[name='Gender']:checked").val();
+                var nameRegex = /^[A-Za-z\s]+$/;
+
+                // Validation
+                if (!name) {
+                    $("#errName").text("Name is required");
+                    return;
+                } else if (!nameRegex.test(name)) {
+                    $("#errName").text("Name can contain only letters and spaces");
+                    return;
+                } else if (name.length > 50) {
+                    $("#errName").text("Name cannot exceed 50 characters");
+                    return;
+                } else {
+                    $("#errName").text("");
+                }
+
+                if (!gender) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Selection Required',
+                        text: 'Please select your gender',
+                        confirmButtonColor: '#ff9500'
+                    });
+                    return;
+                }
+
+                // Show loading state
+                const btn = $(this);
+                btn.addClass('loading').html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+
+                // Prepare data
+                var formData = new FormData();
+                formData.append("EmpId", $("#txtId").val());
+                formData.append("EmpName", name);
+                formData.append("Gender", gender);
+
+                // AJAX call
+                $.ajax({
+                    url: '/ProfileUpdate/UpdateProfile',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        Swal.fire({
+                            icon: response.success ? 'success' : 'error',
+                            title: response.success ? 'Profile Updated!' : 'Update Failed',
+                            text: response.message,
+                            confirmButtonColor: response.success ? '#ff9500' : '#d33',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed && response.success) {
+                                window.location.href = '/Profile/Index';
+                            }
+                        });
+                    },
+                    error: function (err) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Server Error!',
+                            text: 'Something went wrong while updating profile. Please try again.',
+                            confirmButtonColor: '#d33'
+                        });
+                        console.error(err);
+                    },
+                    complete: function () {
+                        // Reset button state
+                        btn.removeClass('loading').html('<i class="fas fa-user-edit"></i> Update Profile');
+                    }
+                });
+            });
+
+            // Enter key support
+            $("#userform input").keypress(function (e) {
+                if (e.which === 13) {
+                    $("#btnSubmit").click();
+                }
+            });
+        });
+    </script>
+}

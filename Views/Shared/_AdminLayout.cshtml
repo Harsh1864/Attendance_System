@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AttendanceProject</title>
+
+    <!-- Bootstrap + Kendo CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/kendo/kendo.default-v2.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @RenderSection("Styles", required: false)
+
+    <style>
+        :root {
+            --primary-orange: #ff9500;
+            --dark-orange: #e08600;
+            --light-orange: #fff3e0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        header {
+            height: 50px;
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+            border-bottom: 1px solid #ff9500;
+        }
+
+        #layout-container {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        #drawer {
+            height: 100%;
+            border-right: 1px solid #ffd8b1;
+            background-color: white;
+        }
+
+        #main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            background: #fffaf0;
+            border-top: 1px solid #ffd8b1;
+            color: #666;
+        }
+
+        /* Drawer item styling */
+        .k-drawer-items li {
+            display: flex;
+            align-items: center;
+            padding: 10px 5px;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            margin: 2px 3px;
+            cursor: pointer;
+        }
+
+        .k-drawer-items li:hover {
+            background-color: #fff3e0;
+            color: #ff9500;
+        }
+
+        .k-drawer-items li.k-selected {
+            background-color: #ff9500;
+            color: white;
+        }
+
+        .k-drawer-items .k-icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .k-toolbar {
+            background: transparent;
+            border: none;
+        }
+
+        .k-toolbar h4 {
+            margin: 0;
+            padding-left: 1rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .k-button.k-flat {
+            background: #ff9500;
+            color: white !important;
+        }
+
+        .k-button.k-flat:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* Kendo overrides for orange theme */
+        .k-drawer .k-drawer-items .k-selected {
+            background-color: #ff9500;
+            color: white;
+        }
+
+        .k-drawer .k-drawer-items .k-selected .k-icon {
+            color: white;
+        }
+
+        .k-drawer .k-drawer-items li:hover .k-icon {
+            color: #ff9500;
+        }
+
+        .k-drawer .k-drawer-items .k-selected:hover {
+            background-color: #e08600;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Toolbar -->
+    <header>
+        <div id="toolbar"></div>
+    </header>
+
+    <!-- Drawer + Main Content -->
+    <div id="layout-container">
+        <div id="drawer"></div>
+
+        <div id="main-content" class="container-fluid">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-top text-muted">
+        &copy; 2025 - AttendanceProject -
+        <a asp-area="" asp-controller="Home" asp-action="Privacy" style="color: #ff9500;">Privacy</a>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/kendo/kendo.all.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Get current page to set active drawer item
+            const currentPath = window.location.pathname;
+            let activeItem = 'Dashboard';
+
+            if (currentPath.includes('/AdminEmployee')) {
+                activeItem = 'Employee';
+            } else if (currentPath.includes('/AdminAttendance')) {
+                activeItem = 'Summary';
+            }
+
+            // Initialize Kendo Drawer
+            $("#drawer").kendoDrawer({
+                template: `
+                    <ul class='k-drawer-items'>
+                        <li data-role='drawer-item' class='${activeItem === 'Dashboard' ? 'k-selected' : ''}' data-route='Dashboard'>
+                            <span class='k-icon k-i-home'></span>
+                            <span class='k-item-text'>Dashboard</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeItem === 'Employee' ? 'k-selected' : ''}' data-route='Employee'>
+                            <span class='k-icon k-i-user'></span>
+                            <span class='k-item-text'>Employee</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeItem === 'Summary' ? 'k-selected' : ''}' data-route='Summary'>
+                            <span class='k-icon k-i-calendar'></span>
+                            <span class='k-item-text'>Summary</span>
+                        </li>
+                        <li data-role='drawer-item' data-route='RunAttendance'>
+                           <span class='k-icon k-i-clock'></span>
+                           <span class='k-item-text'>Run Attendance</span>
+                        </li>        
+                    </ul>
+                `,
+                mode: "push",
+                mini: true,
+                position: "left",
+                minHeight: "100%",
+                itemClick: function (e) {
+                    const route = $(e.item).data("route");
+                    switch (route) {
+                        case "Dashboard":
+                            window.location.href = '/Admin/AdminDashboard';
+                            break;
+                        case "Employee":
+                            window.location.href = '/Admin/AdminEmployee';
+                            break;
+                        case "Summary":
+                            window.location.href = '/Admin/AdminAttendance';
+                            break;
+                        case "RunAttendance":
+                            runAttendance();
+                            break;
+                    }
+                }
+            });
+
+            function runAttendance() {
+                $.ajax({
+                    url: '/Admin/RunAttendance', // controller/action
+                    type: 'POST',
+                    success: function (res) {
+                        alert('Attendance function executed successfully!');
+                    },
+                    error: function (err) {
+                        alert('Error running attendance.');
+                        console.error(err);
+                    }
+                });
+            }
+
+
+            // Toggle Drawer
+            function toggleDrawer() {
+                const drawer = $("#drawer").data("kendoDrawer");
+                const container = drawer.drawerContainer;
+                if (container.hasClass("k-drawer-expanded"))
+                    drawer.hide();
+                else
+                    drawer.show();
+            }
+
+            // Toolbar
+            $("#toolbar").kendoToolBar({
+                items: [
+                    {
+                        type: "button",
+                        icon: "menu",
+                        attributes: { class: "k-flat" },
+                        click: toggleDrawer
+                    },
+                    { template: "<h4>Attendance Management System</h4>" },
+                    { type: "spacer" },
+                    {
+                        template: `
+                            <button class="logout-btn" onclick="window.location.href='/Home/Logout'">
+                                <span class="k-icon k-i-logout"></span> Logout
+                            </button>
+                        `
+                    }
+                ]
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>
