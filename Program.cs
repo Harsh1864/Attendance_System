@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddSingleton<DbConnectionFactory>();
+builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<EmployeeViewService>();

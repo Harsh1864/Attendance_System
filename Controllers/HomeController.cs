@@ -13,12 +13,15 @@ public class HomeController : Controller
 
     private readonly RabbitMqService _mq;
         private readonly IChatService _chat;
-    public HomeController(ILogger<HomeController> logger, AuthServices auth,RabbitMqService mq,IChatService chat)
+    private readonly AuditService _audit;
+
+    public HomeController(ILogger<HomeController> logger, AuthServices auth, RabbitMqService mq, IChatService chat, AuditService audit)
     {
         _logger = logger;
         _auth = auth;
         _mq = mq;
         _chat = chat;
+        _audit = audit;
     }
 
     public IActionResult Index()
@@ -43,9 +46,13 @@ public class HomeController : Controller
             HttpContext.Session.SetString("Statuses", statuses);
             HttpContext.Session.SetString("Mail", login.EmpMail);
             HttpContext.Session.SetString("Ids", Convert.ToString(ids));
+            await _audit.LogAsync(AuditService.ActorFrom(HttpContext), AuditActions.LoginSucceeded, "Employee", ids);
             return Json(new { message = "Login successfully", success = true, role = role, statuses = statuses , ids = ids });
         } 
 
+        await _audit.LogAsync(
+            new project.Models.Actor(null, login.EmpMail.Trim(), HttpContext.Connection.RemoteIpAddress?.ToString()),
+            AuditActions.LoginFailed, "Employee");
         return Json(new { message = "Invalid Credential", success = false, role = "" });
     }
 
@@ -93,6 +100,9 @@ public class HomeController : Controller
             string message = $"New user registered: {emp.EmpName} ({emp.EmpMail}) at {DateTime.Now}";
                     _mq.SendToUser("System", "admin", message);
                     _chat.SendToUser("System", "admin", message);
+            await _audit.LogAsync(
+                new project.Models.Actor(null, emp.EmpMail, HttpContext.Connection.RemoteIpAddress?.ToString()),
+                AuditActions.Registered, "Employee", null, $"Name: {emp.EmpName}");
             return Json(new
             {
                 success = true,

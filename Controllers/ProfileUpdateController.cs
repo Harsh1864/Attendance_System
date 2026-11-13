@@ -16,10 +16,13 @@ namespace try_project_casepoint.Controllers
 
         private readonly ProfileUpdateService _profileupdateservice;
 
-        public ProfileUpdateController(ILogger<ProfileUpdateController> logger, ProfileUpdateService profileuservice)
+        private readonly project.Services.AuditService _audit;
+
+        public ProfileUpdateController(ILogger<ProfileUpdateController> logger, ProfileUpdateService profileuservice, project.Services.AuditService audit)
         {
             _profileupdateservice = profileuservice;
             _logger = logger;
+            _audit = audit;
         }
 
         public IActionResult Index()
@@ -61,6 +64,9 @@ namespace try_project_casepoint.Controllers
                 employee.EmpPassword = null;
 
                 await _profileupdateservice.UpdateProfile(employee);
+                await _audit.LogAsync(project.Services.AuditService.ActorFrom(HttpContext),
+                    project.Services.AuditActions.ProfileUpdated, "Employee", empId,
+                    $"Name: {employee.EmpName}; Gender: {employee.Gender}");
 
                 return Json(new { success = true, message = "Profile updated successfully!" });
             }
@@ -101,6 +107,8 @@ namespace try_project_casepoint.Controllers
                     return Json(new { success = false, message = "New password must be 6 to 100 characters long." });
 
                 await _profileupdateservice.UpdatePassword(sessionEmpId, project.Services.PasswordHasher.Hash(newPassword));
+                await _audit.LogAsync(project.Services.AuditService.ActorFrom(HttpContext),
+                    project.Services.AuditActions.PasswordChanged, "Employee", sessionEmpId);
                 return Json(new { success = true, message = "Password updated successfully!" });
             }
             catch (Exception ex)

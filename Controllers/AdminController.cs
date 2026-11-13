@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MVC.Services;
+using project.Services;
 using try_project_casepoint.Services;
 
 namespace project.Controllers
@@ -18,8 +19,11 @@ namespace project.Controllers
         private readonly RabbitMqService _mq;
         private readonly IChatService _chat;
 
-        public AdminController(ILogger<AdminController> logger, AdminService adminService, RabbitMqService mq, IChatService chat)
+        private readonly AuditService _audit;
+
+        public AdminController(ILogger<AdminController> logger, AdminService adminService, RabbitMqService mq, IChatService chat, AuditService audit)
         {
+            _audit = audit;
             _logger = logger;
             _adminService = adminService;
             _mq = mq;
@@ -37,6 +41,19 @@ namespace project.Controllers
 
         public IActionResult AdminEmployee() => View();
 
+        public IActionResult AuditLog() => View();
+
+        [HttpGet]
+        public async Task<IActionResult> GetAuditLog(DateTime? from, DateTime? to, string? action, string? search)
+        {
+            var end = (to ?? DateTime.Today).Date;
+            var start = (from ?? end.AddDays(-6)).Date;
+            if (start > end) return BadRequest("'from' must be on or before 'to'.");
+
+            var entries = await _audit.SearchAsync(start, end, action, search);
+            return Json(entries);
+        }
+
         // [HttpPost]
         // public async Task<IActionResult> MarkAbsentees()
         // {
@@ -51,6 +68,7 @@ namespace project.Controllers
             {
                 // Call your existing attendance function
                 await _adminService.MarkAbsenteesAsync();
+                await _audit.LogAsync(AuditService.ActorFrom(HttpContext), AuditActions.AbsenteeJobRun, "Attendance", null, "Run manually");
 
                 return Ok(new { message = "Attendance executed successfully" });
             }
@@ -141,6 +159,8 @@ namespace project.Controllers
                 return Json(new { success = false, message = "Invalid status" });
 
             var result = await _adminService.UpdateEmployeeStatus(empId, status);
+            if (result)
+                await _audit.LogAsync(AuditService.ActorFrom(HttpContext), AuditActions.EmployeeStatusChanged, "Employee", empId, $"Status: {status}");
             return Json(new { success = result });
         }
 
@@ -179,6 +199,9 @@ namespace project.Controllers
                 }
 
                 var result = await _adminService.UpdateEmployeeDetails(empId, empName, gender, status, profileFileName);
+                if (result)
+                    await _audit.LogAsync(AuditService.ActorFrom(HttpContext), AuditActions.EmployeeUpdated, "Employee", empId,
+                        $"Name: {empName}; Gender: {gender}; Status: {status}" + (profileFileName != null ? "; Picture changed" : ""));
                 return Json(new { success = result, message = result ? "Employee updated successfully" : "No changes made" });
             }
             catch (Exception ex)
