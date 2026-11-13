@@ -1,59 +1,72 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using project.Services;
 
 namespace try_project_casepoint.Services
 {
+    /// <summary>
+    /// Marks active employees with no attendance row as Absent once a day,
+    /// at Shift:AbsenteeRunTime (default 18:00). Weekends are skipped when
+    /// Shift:SkipWeekends is true.
+    /// </summary>
     public class DailyTaskService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IOptionsMonitor<ShiftOptions> _shift;
+        private readonly ILogger<DailyTaskService> _logger;
 
-        public DailyTaskService(IServiceProvider serviceProvider)
+        public DailyTaskService(IServiceProvider serviceProvider, IOptionsMonitor<ShiftOptions> shift, ILogger<DailyTaskService> logger)
         {
             _serviceProvider = serviceProvider;
+            _shift = shift;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var now = DateTime.Now;
-
-                // DateTime.Today.AddHours(17) for 5 PM
-                var scheduledTime = DateTime.Now.AddMinutes(100);
-
-                if (now > scheduledTime)
-                    scheduledTime = scheduledTime.AddDays(1);
-
-                var delay = scheduledTime - now;
-                Console.WriteLine($"Next run in: {delay.TotalMinutes:F2} minutes");
+                var options = _shift.CurrentValue;
+                var delay = AttendanceRules.DelayUntilNext(DateTime.Now, options.AbsenteeRunTimeOfDay);
+                _logger.LogInformation("Absentee job scheduled in {Minutes:F0} minutes", delay.TotalMinutes);
 
                 try
                 {
                     await Task.Delay(delay, stoppingToken);
-                    await RunDailyTask();
+                }
+                catch (TaskCanceledException)
+                {
+                    break;
+                }
 
-                    Console.WriteLine($"Task done at {DateTime.Now}");
+                if (options.SkipWeekends && AttendanceRules.IsWeekend(DateTime.Today))
+                {
+                    _logger.LogInformation("Skipping absentee job on weekend {Date:yyyy-MM-dd}", DateTime.Today);
+                    continue;
+                }
+
+                try
+                {
+                    await RunDailyTask();
+                    _logger.LogInformation("Absentee job finished at {Time}", DateTime.Now);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Daily tAsk Error {ex.Message}");
+                    _logger.LogError(ex, "Absentee job failed");
                 }
-
-                // FOR NEXT DAYYY
-                await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
             }
         }
 
         private async Task RunDailyTask()
         {
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var adminService = scope.ServiceProvider.GetRequiredService<AdminService>();
-                await adminService.MarkAbsenteesAsync();
-            }
+            using var scope = _serviceProvider.CreateScope();
+            var adminService = scope.ServiceProvider.GetRequiredService<AdminService>();
+            await adminService.MarkAbsenteesAsync();
         }
     }
 }

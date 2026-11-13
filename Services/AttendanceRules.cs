@@ -14,6 +14,9 @@ namespace project.Services
         /// <summary>Time of day the absentee job runs, e.g. "18:00".</summary>
         public string AbsenteeRunTime { get; set; } = "18:00";
 
+        /// <summary>When true, the absentee job does not run on Saturday or Sunday.</summary>
+        public bool SkipWeekends { get; set; } = true;
+
         public TimeSpan StartTime => ParseOr(Start, new TimeSpan(9, 15, 0));
         public TimeSpan EndTime => ParseOr(End, new TimeSpan(17, 0, 0));
         public TimeSpan AbsenteeRunTimeOfDay => ParseOr(AbsenteeRunTime, new TimeSpan(18, 0, 0));
@@ -61,6 +64,9 @@ namespace project.Services
             var hours = (int)Math.Floor(minutes / 60.0);
             return hours < 1 ? 1 : hours;
         }
+
+        public static bool IsWeekend(DateTime date) =>
+            date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
 
         /// <summary>Time until the next occurrence of <paramref name="runAt"/> after <paramref name="now"/>.</summary>
         public static TimeSpan DelayUntilNext(DateTime now, TimeSpan runAt)
