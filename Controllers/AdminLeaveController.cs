@@ -11,11 +11,13 @@ namespace project.Controllers
     {
         private readonly LeaveService _leave;
         private readonly AuditService _audit;
+        private readonly NotificationService _notifications;
 
-        public AdminLeaveController(LeaveService leave, AuditService audit)
+        public AdminLeaveController(LeaveService leave, AuditService audit, NotificationService notifications)
         {
             _leave = leave;
             _audit = audit;
+            _notifications = notifications;
         }
 
         [HttpGet("")]
@@ -54,6 +56,8 @@ namespace project.Controllers
             await _audit.LogAsync(actor, approve ? AuditActions.LeaveApproved : AuditActions.LeaveRejected, "Leave", id,
                 $"{leave!.EmpName}: {leave.LeaveType} {leave.FromDate:yyyy-MM-dd} to {leave.ToDate:yyyy-MM-dd}" +
                 (string.IsNullOrWhiteSpace(note) ? "" : $"; Note: {note.Trim()}"));
+
+            await _notifications.SendAsync(leave.EmpId, NotificationMessages.LeaveDecision(leave, approve, note));
 
             return Json(new { success = true, message = approve ? "Leave approved." : "Leave rejected." });
         }

@@ -177,6 +177,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/kendo/kendo.all.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/notification-bell.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
@@ -266,6 +267,14 @@
                     { template: "<h4>AttendanceProject</h4>" },
                     { type: "spacer" },
                     { template: "<span id='liveClock' class='text-primary'></span>" },
+                    {
+                        template: `
+                            <a id="notifBell" class="notif-bell" href="/Notifications/Index" title="Notifications">
+                                <span class="k-icon k-i-bell"></span>
+                                <span id="notifBadge" class="notif-badge" style="display:none"></span>
+                            </a>
+                        `
+                    },
                     {
                         template: `
                             <button class="logout-btn" onclick="window.location.href='/Home/Logout'">

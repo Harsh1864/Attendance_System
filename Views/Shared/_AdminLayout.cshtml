@@ -172,6 +172,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/kendo/kendo.all.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/notification-bell.js" asp-append-version="true"></script>
 
     <script>
         $(document).ready(function () {
@@ -311,6 +312,14 @@
                     },
                     { template: "<h4>Attendance Management System</h4>" },
                     { type: "spacer" },
+                    {
+                        template: `
+                            <a id="notifBell" class="notif-bell" href="/Notifications/Index" title="Notifications">
+                                <span class="k-icon k-i-bell"></span>
+                                <span id="notifBadge" class="notif-badge" style="display:none"></span>
+                            </a>
+                        `
+                    },
                     {
                         template: `
                             <button class="logout-btn" onclick="window.location.href='/Home/Logout'">

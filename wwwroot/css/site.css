@@ -20,3 +20,34 @@ html {
 body {
   margin-bottom: 60px;
 }
+/* Toolbar notification bell (wwwroot/js/notification-bell.js) */
+.notif-bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: white !important;
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-right: 6px;
+}
+
+.notif-bell:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.notif-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}

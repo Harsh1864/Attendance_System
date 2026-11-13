@@ -17,9 +17,12 @@ namespace project.Controllers
         private readonly AttendanceEditService _edit;
         private readonly AuditService _audit;
         private readonly ShiftOptions _shift;
+        private readonly NotificationService _notifications;
 
-        public AdminAttendanceEditController(AttendanceEditService edit, AuditService audit, IOptions<ShiftOptions> shift)
+        public AdminAttendanceEditController(AttendanceEditService edit, AuditService audit, IOptions<ShiftOptions> shift,
+            NotificationService notifications)
         {
+            _notifications = notifications;
             _edit = edit;
             _audit = audit;
             _shift = shift.Value;
@@ -64,6 +67,8 @@ namespace project.Controllers
                 before == null ? AuditActions.AttendanceCreated : AuditActions.AttendanceEdited,
                 "Attendance", id, details);
 
+            await _notifications.SendAsync(input.EmpId, NotificationMessages.AttendanceChanged(after, input.Reason!));
+
             return Json(new
             {
                 success = true,
@@ -88,6 +93,9 @@ namespace project.Controllers
 
             await _audit.LogAsync(AuditService.ActorFrom(HttpContext), AuditActions.AttendanceDeleted, "Attendance", id,
                 $"{deleted.EmpName} (employee {deleted.EmpId}): {AttendanceEditService.Describe(deleted)}; Reason: {reason.Trim()}");
+
+            await _notifications.SendAsync(deleted.EmpId,
+                NotificationMessages.AttendanceChanged($"record for {deleted.Date:dd MMM yyyy} removed", reason));
 
             return Json(new { success = true, message = "Record deleted." });
         }

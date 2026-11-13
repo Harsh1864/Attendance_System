@@ -17,9 +17,12 @@ namespace project.Controllers
         private readonly AuditService _audit;
         private readonly RabbitMqService _mq;
         private readonly IChatService _chat;
+        private readonly NotificationService _notifications;
 
-        public LeaveController(LeaveService leave, HolidayService holidays, AuditService audit, RabbitMqService mq, IChatService chat)
+        public LeaveController(LeaveService leave, HolidayService holidays, AuditService audit, RabbitMqService mq, IChatService chat,
+            NotificationService notifications)
         {
+            _notifications = notifications;
             _leave = leave;
             _holidays = holidays;
             _audit = audit;
@@ -81,6 +84,9 @@ namespace project.Controllers
             var actor = AuditService.ActorFrom(HttpContext);
             var summary = $"{input.LeaveType} {input.FromDate:yyyy-MM-dd} to {input.ToDate:yyyy-MM-dd} ({days:0.#} day(s))";
             await _audit.LogAsync(actor, AuditActions.LeaveRequested, "Leave", id, summary);
+
+            var empName = (await _leave.GetAsync(id))?.EmpName ?? $"Employee {empId}";
+            await _notifications.SendToAdminsAsync(NotificationMessages.LeaveRequested(empName, summary));
 
             var note = $"Leave request from employee {empId}: {summary}";
             try

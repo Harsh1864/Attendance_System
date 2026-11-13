@@ -1,0 +1,83 @@
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = (bool)ViewBag.IsAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "../Shared/_EmployeeLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    <style>
+        .notif-item { display: flex; gap: 12px; padding: 12px 4px; border-bottom: 1px solid #f1f1f1; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex: none; background: transparent; }
+        .notif-item.unread .notif-dot { background: var(--primary-orange); }
+        .notif-item.unread .notif-title { font-weight: 700; }
+        .notif-body { flex: 1; }
+        .notif-time { font-size: 0.8rem; color: #888; white-space: nowrap; }
+    </style>
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4" style="max-width: 820px;">
+    <h3 class="text-center page-title">Notifications</h3>
+
+    <div class="panel">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted" id="notifSummary"></span>
+            <button id="markAll" class="btn-outline-orange btn-sm">Mark all as read</button>
+        </div>
+        <div id="notifList"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+
+            function render(rows) {
+                var unread = rows.filter(function (n) { return !n.isRead; }).length;
+                $("#notifSummary").text(rows.length === 0 ? "" : unread + " unread of " + rows.length);
+                $("#markAll").prop("disabled", unread === 0);
+
+                if (!rows.length) {
+                    $("#notifList").html("<div class='empty-state'>You have no notifications.</div>");
+                    return;
+                }
+
+                $("#notifList").html(rows.map(function (n) {
+                    var when = kendo.toString(kendo.parseDate(n.createdAt), "dd MMM yyyy, HH:mm");
+                    var link = n.link ? " <a href='" + kendo.htmlEncode(n.link) + "' class='js-open' data-id='" + n.notificationId + "'>Open</a>" : "";
+                    return "<div class='notif-item" + (n.isRead ? "" : " unread") + "' data-id='" + n.notificationId + "'>" +
+                        "<div class='notif-dot'></div>" +
+                        "<div class='notif-body'><div class='notif-title'>" + kendo.htmlEncode(n.title) + "</div>" +
+                        "<div>" + kendo.htmlEncode(n.message) + link + "</div></div>" +
+                        "<div class='notif-time'>" + when + "</div></div>";
+                }).join(""));
+            }
+
+            function load() { $.getJSON("/Notifications/List").done(render); }
+
+            function markRead(id) {
+                return $.post("/Notifications/MarkRead", { __RequestVerificationToken: token(), id: id });
+            }
+
+            $("#notifList").on("click", ".notif-item.unread", function (e) {
+                if ($(e.target).is("a")) return;
+                markRead($(this).data("id")).done(function () { load(); if (window.refreshNotificationBell) refreshNotificationBell(); });
+            });
+
+            $("#notifList").on("click", ".js-open", function (e) {
+                e.preventDefault();
+                var href = $(this).attr("href");
+                markRead($(this).data("id")).always(function () { window.location.href = href; });
+            });
+
+            $("#markAll").on("click", function () {
+                markRead(null).done(function () { load(); if (window.refreshNotificationBell) refreshNotificationBell(); });
+            });
+
+            load();
+        });
+    </script>
+}
