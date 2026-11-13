@@ -23,13 +23,33 @@ namespace project.Services
                 if (_con.State != System.Data.ConnectionState.Open)
                     await _con.OpenAsync();
 
-                string s = "SELECT COUNT(*) FROM t_aemployee WHERE LOWER(c_email) = LOWER(@mail) AND c_password = @pass";
-                using var cmd = new NpgsqlCommand(s, _con);
-                cmd.Parameters.AddWithValue("@mail", login.EmpMail.Trim());
-                cmd.Parameters.AddWithValue("@pass", login.EmpPassword);
+                int empId;
+                string? stored;
+                using (var cmd = new NpgsqlCommand(
+                    "SELECT c_empid, c_password FROM t_aemployee WHERE LOWER(c_email) = LOWER(@mail) LIMIT 1", _con))
+                {
+                    cmd.Parameters.AddWithValue("@mail", login.EmpMail.Trim());
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    if (!await reader.ReadAsync()) return false;
+                    empId = reader.GetInt32(0);
+                    stored = reader.IsDBNull(1) ? null : reader.GetString(1);
+                }
 
-                var counts = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-                return counts > 0;
+                if (!PasswordHasher.Verify(login.EmpPassword, stored))
+                    return false;
+
+                // Upgrade legacy plain-text passwords to a hash on successful login.
+                if (PasswordHasher.NeedsRehash(stored))
+                {
+                    using var upd = new NpgsqlCommand(
+                        "UPDATE t_aemployee SET c_password = @pass WHERE c_empid = @id", _con);
+                    upd.Parameters.AddWithValue("@pass", PasswordHasher.Hash(login.EmpPassword));
+                    upd.Parameters.AddWithValue("@id", empId);
+                    try { await upd.ExecuteNonQueryAsync(); }
+                    catch (Exception ex) { Console.WriteLine($"[Password upgrade skipped]: {ex.Message}"); }
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -135,7 +155,7 @@ namespace project.Services
                 using var cmd = new NpgsqlCommand(query, _con);
                 cmd.Parameters.AddWithValue("@name", emp.EmpName);
                 cmd.Parameters.AddWithValue("@mail", emp.EmpMail);
-                cmd.Parameters.AddWithValue("@pass", emp.EmpPassword);
+                cmd.Parameters.AddWithValue("@pass", PasswordHasher.Hash(emp.EmpPassword));
                 cmd.Parameters.AddWithValue("@gender", emp.Gender);
 
                 cmd.Parameters.AddWithValue("@profile", (object?)emp.Profile ?? DBNull.Value);

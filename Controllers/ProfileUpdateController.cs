@@ -89,12 +89,18 @@ namespace try_project_casepoint.Controllers
                 var sessionEmpId = Convert.ToInt32(HttpContext.Session.GetString("Ids"));
                 var user = await _profileupdateservice.GetEmployeeById(sessionEmpId); // Use actual empId here
 
-                if (user.EmpPassword != oldPassword)
+                if (user == null)
+                    return Json(new { success = false, message = "Session expired. Please log in again." });
+
+                if (!project.Services.PasswordHasher.Verify(oldPassword, user.EmpPassword))
                 {
                     return Json(new { success = false, message = "Old password is incorrect!" });
                 }
-                
-                await _profileupdateservice.UpdatePassword(sessionEmpId, newPassword); // Use actual empId here
+
+                if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 6 || newPassword.Length > 100)
+                    return Json(new { success = false, message = "New password must be 6 to 100 characters long." });
+
+                await _profileupdateservice.UpdatePassword(sessionEmpId, project.Services.PasswordHasher.Hash(newPassword));
                 return Json(new { success = true, message = "Password updated successfully!" });
             }
             catch (Exception ex)
