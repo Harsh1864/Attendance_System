@@ -37,6 +37,7 @@ builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<AttendanceEditService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<CorrectionService>();
+builder.Services.AddScoped<DepartmentService>();
 builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<EmployeeViewService>();

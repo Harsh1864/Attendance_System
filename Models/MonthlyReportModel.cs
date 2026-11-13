@@ -8,6 +8,7 @@ namespace project.Models
     {
         public int EmpId { get; set; }
         public string EmpName { get; set; } = "";
+        public string? Department { get; set; }
         public string Status { get; set; } = "";
 
         /// <summary>Working days so far this month (excludes weekends, holidays and future days).</summary>

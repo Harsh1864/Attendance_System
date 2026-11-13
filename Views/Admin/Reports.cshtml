@@ -15,6 +15,10 @@
             <label for="reportMonth">Month</label>
             <input id="reportMonth" style="width: 180px;" />
         </div>
+        <div class="field">
+            <label for="reportDept">Department</label>
+            <input id="reportDept" style="width: 200px;" />
+        </div>
         <button id="reportLoad" class="btn-orange">Show</button>
         <button id="reportCsv" class="btn-outline-orange">Download CSV</button>
         <span class="ms-auto text-muted" id="reportInfo"></span>
@@ -54,9 +58,26 @@
                 max: new Date(now.getFullYear(), now.getMonth(), 1)
             }).data("kendoDatePicker");
 
+            var deptList = $("#reportDept").kendoDropDownList({
+                dataTextField: "name", dataValueField: "id",
+                dataSource: {
+                    transport: { read: { url: "/Admin/Departments/List", dataType: "json" } },
+                    schema: {
+                        parse: function (rows) {
+                            return [{ id: "", name: "All departments" }, { id: 0, name: "No department" }]
+                                .concat(rows.map(function (d) { return { id: d.departmentId, name: d.name }; }));
+                        }
+                    }
+                },
+                change: function () { load(); }
+            }).data("kendoDropDownList");
+
             function selected() {
                 var d = monthPicker.value() || now;
-                return { year: d.getFullYear(), month: d.getMonth() + 1 };
+                var dept = deptList.value();
+                var s = { year: d.getFullYear(), month: d.getMonth() + 1 };
+                if (dept !== "" && dept !== null && dept !== undefined) s.departmentId = dept;
+                return s;
             }
 
             function pct(v) { return v === null || v === undefined ? "–" : kendo.toString(v, "0.0") + "%"; }
@@ -91,6 +112,7 @@
                             return kendo.htmlEncode(r.empName) + (r.status !== "Active" ? " <span class='badge-status badge-cancelled'>" + kendo.htmlEncode(r.status) + "</span>" : "");
                         }
                     },
+                    { field: "department", title: "Department", width: 130, template: function (r) { return kendo.htmlEncode(r.department || "–"); } },
                     { field: "workingDays", title: "Working", width: 85 },
                     { field: "presentDays", title: "Present", width: 85 },
                     { field: "lateDays", title: "Late", width: 70 },
@@ -148,7 +170,7 @@
             $("#reportLoad").on("click", load);
             $("#reportCsv").on("click", function () {
                 var s = selected();
-                window.location.href = "/Admin/Reports/MonthlyCsv?year=" + s.year + "&month=" + s.month;
+                window.location.href = "/Admin/Reports/MonthlyCsv?" + $.param(s);
             });
 
             load();

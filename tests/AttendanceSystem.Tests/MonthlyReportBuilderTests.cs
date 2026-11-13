@@ -184,7 +184,7 @@ public class MonthlyReportBuilderTests
             {
                 new MonthlyReportRow
                 {
-                    EmpId = 7, EmpName = "Asha", Status = "Active", WorkingDays = 21, PresentDays = 20,
+                    EmpId = 7, EmpName = "Asha", Department = "Sales", Status = "Active", WorkingDays = 21, PresentDays = 20,
                     LateDays = 2, LeaveDays = 1, TotalHours = 160, AverageHours = 8, AttendancePercent = 100,
                 },
             },
@@ -194,8 +194,8 @@ public class MonthlyReportBuilderTests
         Assert.Equal("Month,November 2026", lines[0]);
         Assert.Equal("Working days,21", lines[1]);
         Assert.Equal("", lines[2]);
-        Assert.StartsWith("Employee ID,Employee,Status", lines[3]);
-        Assert.Equal("7,Asha,Active,21,20,2,0,0,1,0,160,8.0,100.0", lines[4]);
+        Assert.StartsWith("Employee ID,Employee,Department,Status", lines[3]);
+        Assert.Equal("7,Asha,Sales,Active,21,20,2,0,0,1,0,160,8.0,100.0", lines[4]);
     }
 
     [Theory]

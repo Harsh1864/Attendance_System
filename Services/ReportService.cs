@@ -31,10 +31,11 @@ namespace project.Services
             return null;
         }
 
-        public async Task<MonthlyReportModel> GetMonthlyAsync(int year, int month, DateTime today)
+        /// <param name="departmentId">null = everyone, 0 = employees with no department, otherwise that department.</param>
+        public async Task<MonthlyReportModel> GetMonthlyAsync(int year, int month, DateTime today, int? departmentId = null)
         {
             var (start, end) = MonthlyReportBuilder.MonthRange(year, month);
-            var employees = await GetEmployeesAsync(null);
+            var employees = await GetEmployeesAsync(null, departmentId);
             var attendance = await GetAttendanceAsync(start, end, null);
             var leave = await _leave.SearchAsync(start, end, LeaveRules.Approved);
             var holidays = await GetHolidayMapAsync(start, end);
@@ -66,21 +67,27 @@ namespace project.Services
             return list.ToDictionary(h => h.Date.Date, h => h.Name);
         }
 
-        private async Task<List<MonthlyReportBuilder.EmployeeInfo>> GetEmployeesAsync(int? empId)
+        private async Task<List<MonthlyReportBuilder.EmployeeInfo>> GetEmployeesAsync(int? empId, int? departmentId = null)
         {
             var list = new List<MonthlyReportBuilder.EmployeeInfo>();
             await using var conn = await _db.OpenAsync();
             await using var cmd = new NpgsqlCommand(@"
-                SELECT c_empid, c_name, c_status
-                  FROM t_aemployee
-                 WHERE c_empid != 1 AND c_role != 'Admin'
-                   AND (@emp IS NULL OR c_empid = @emp)
-                 ORDER BY c_name;", conn);
+                SELECT e.c_empid, e.c_name, e.c_status, d.c_name
+                  FROM t_aemployee e
+                  LEFT JOIN t_adepartment d ON d.c_departmentid = e.c_departmentid
+                 WHERE e.c_empid != 1 AND e.c_role != 'Admin'
+                   AND (@emp IS NULL OR e.c_empid = @emp)
+                   AND (@dept IS NULL
+                        OR (@dept = 0 AND e.c_departmentid IS NULL)
+                        OR e.c_departmentid = @dept)
+                 ORDER BY e.c_name;", conn);
             cmd.Parameters.AddWithValue("emp", NpgsqlDbType.Integer, (object?)empId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("dept", NpgsqlDbType.Integer, (object?)departmentId ?? DBNull.Value);
 
             await using var rd = await cmd.ExecuteReaderAsync();
             while (await rd.ReadAsync())
-                list.Add(new MonthlyReportBuilder.EmployeeInfo(rd.GetInt32(0), rd.GetString(1), rd.IsDBNull(2) ? "" : rd.GetString(2)));
+                list.Add(new MonthlyReportBuilder.EmployeeInfo(
+                    rd.GetInt32(0), rd.GetString(1), rd.IsDBNull(2) ? "" : rd.GetString(2), rd.IsDBNull(3) ? null : rd.GetString(3)));
             return list;
         }
 

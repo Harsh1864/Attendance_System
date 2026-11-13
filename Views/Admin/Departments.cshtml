@@ -1,0 +1,234 @@
+@{
+    ViewData["Title"] = "Departments";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+    <style>
+        .dept-item { padding: 10px 12px; border: 1px solid #f0f0f0; border-radius: 8px; margin-bottom: 8px; cursor: pointer; }
+        .dept-item:hover { background: var(--card-orange); }
+        .dept-item.active { border-color: var(--primary-orange); background: var(--light-orange); }
+        .dept-name { font-weight: 600; }
+        .dept-meta { font-size: 0.8rem; color: #777; }
+    </style>
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Departments</h3>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="panel-title mb-0">All departments</div>
+                    <button id="newDept" class="btn-orange btn-sm">+ New</button>
+                </div>
+                <div id="deptList"></div>
+                <div class="dept-item" data-id="" id="unassignedItem">
+                    <div class="dept-name">Unassigned</div>
+                    <div class="dept-meta" id="unassignedMeta"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="panel">
+                <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+                    <div>
+                        <div class="panel-title mb-1" id="deptTitle">Select a department</div>
+                        <div class="text-muted small" id="deptDescription"></div>
+                    </div>
+                    <div class="d-flex gap-2" id="deptActions" style="display:none !important;">
+                        <button id="editDept" class="btn-outline-orange btn-sm">Rename</button>
+                        <button id="deleteDept" class="btn-outline-orange btn-sm">Delete</button>
+                    </div>
+                </div>
+
+                <div class="filter-bar" id="assignBar" style="display:none;">
+                    <div class="field" style="flex: 1;">
+                        <label for="addMembers">Add employees</label>
+                        <select id="addMembers" multiple="multiple" style="width: 100%;"></select>
+                    </div>
+                    <button id="addMembersBtn" class="btn-orange">Add</button>
+                </div>
+
+                <div id="memberGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="deptWindow" style="display:none;">
+    <input type="hidden" id="dId" />
+    <div class="mb-3">
+        <label for="dName" class="form-label">Name</label>
+        <input id="dName" class="k-textbox w-100" maxlength="50" />
+    </div>
+    <div class="mb-3">
+        <label for="dDesc" class="form-label">Description (optional)</label>
+        <textarea id="dDesc" class="k-textarea w-100" rows="2" maxlength="200"></textarea>
+    </div>
+    <div class="d-flex justify-content-end gap-2">
+        <button id="dCancel" class="btn-outline-orange">Cancel</button>
+        <button id="dSave" class="btn-orange">Save</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+            // traditional: true sends arrays as empIds=1&empIds=2, which MVC binds to int[].
+            function post(url, data) {
+                return $.ajax({ type: "POST", url: url, traditional: true, data: $.extend({ __RequestVerificationToken: token() }, data) });
+            }
+
+            var departments = [], employees = [];
+            var selected = null;   // department id, or "" for unassigned
+
+            var memberGrid = $("#memberGrid").kendoGrid({
+                dataSource: { data: [], sort: { field: "empName", dir: "asc" } },
+                sortable: true,
+                noRecords: { template: "<div class='empty-state'>No employees here.</div>" },
+                columns: [
+                    { field: "empName", title: "Name" },
+                    { field: "empMail", title: "Email" },
+                    {
+                        field: "status", title: "Status", width: 110,
+                        template: function (r) {
+                            return "<span class='badge-status " + (r.status === "Active" ? "badge-approved" : "badge-cancelled") + "'>" + kendo.htmlEncode(r.status) + "</span>";
+                        }
+                    },
+                    {
+                        title: "", width: 120,
+                        template: function (r) {
+                            return r.departmentId
+                                ? "<button class='btn-outline-orange btn-sm js-remove' data-id='" + r.empId + "'>Remove</button>"
+                                : "";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            var addMembers = $("#addMembers").kendoMultiSelect({
+                dataTextField: "label", dataValueField: "empId", placeholder: "Search employees…", autoClose: false
+            }).data("kendoMultiSelect");
+
+            var win = $("#deptWindow").kendoWindow({ width: 440, modal: true, visible: false, resizable: false }).data("kendoWindow");
+
+            function load() {
+                return $.when($.getJSON("/Admin/Departments/List"), $.getJSON("/Admin/Departments/Employees"))
+                    .done(function (d, e) {
+                        departments = d[0];
+                        employees = e[0];
+                        renderList();
+                        if (selected !== null && selected !== "" && !departments.some(function (x) { return x.departmentId === selected; })) selected = null;
+                        select(selected);
+                    });
+            }
+
+            function renderList() {
+                $("#deptList").html(departments.length ? departments.map(function (d) {
+                    return "<div class='dept-item' data-id='" + d.departmentId + "'>" +
+                        "<div class='dept-name'>" + kendo.htmlEncode(d.name) + "</div>" +
+                        "<div class='dept-meta'>" + d.memberCount + " employee(s), " + d.activeCount + " active</div></div>";
+                }).join("") : "<div class='empty-state'>No departments yet.</div>");
+
+                var unassigned = employees.filter(function (e) { return !e.departmentId; }).length;
+                $("#unassignedMeta").text(unassigned + " employee(s)");
+            }
+
+            function select(id) {
+                selected = id;
+                $(".dept-item").removeClass("active");
+                if (id === null) {
+                    $("#deptTitle").text("Select a department");
+                    $("#deptDescription").text("");
+                    $("#deptActions").attr("style", "display:none !important;");
+                    $("#assignBar").hide();
+                    memberGrid.dataSource.data([]);
+                    return;
+                }
+
+                $(".dept-item[data-id='" + id + "']").addClass("active");
+                var dept = departments.find(function (d) { return d.departmentId === id; });
+                $("#deptTitle").text(dept ? dept.name : "Unassigned employees");
+                $("#deptDescription").text(dept ? (dept.description || "") : "Employees who are not in any department.");
+                $("#deptActions").attr("style", dept ? "" : "display:none !important;");
+                $("#assignBar").toggle(!!dept);
+
+                var members = employees.filter(function (e) { return dept ? e.departmentId === id : !e.departmentId; });
+                memberGrid.dataSource.data(members);
+
+                if (dept) {
+                    addMembers.setDataSource(employees
+                        .filter(function (e) { return e.departmentId !== id; })
+                        .map(function (e) {
+                            return { empId: e.empId, label: e.empName + (e.departmentName ? " (" + e.departmentName + ")" : "") };
+                        }));
+                    addMembers.value([]);
+                }
+            }
+
+            $("#deptList").on("click", ".dept-item", function () { select($(this).data("id")); });
+            $("#unassignedItem").on("click", function () { select(""); });
+
+            function openEditor(dept) {
+                $("#dId").val(dept ? dept.departmentId : "");
+                $("#dName").val(dept ? dept.name : "");
+                $("#dDesc").val(dept ? (dept.description || "") : "");
+                win.title(dept ? "Edit department" : "New department").center().open();
+                $("#dName").trigger("focus");
+            }
+
+            $("#newDept").on("click", function () { openEditor(null); });
+            $("#editDept").on("click", function () {
+                openEditor(departments.find(function (d) { return d.departmentId === selected; }));
+            });
+            $("#dCancel").on("click", function () { win.close(); });
+
+            $("#dSave").on("click", function () {
+                var name = $.trim($("#dName").val());
+                if (!name) { kendo.alert("Please enter a name."); return; }
+                post("/Admin/Departments/Save", { id: $("#dId").val() || null, name: name, description: $("#dDesc").val() })
+                    .done(function (res) {
+                        if (!res.success) { kendo.alert(res.message); return; }
+                        win.close();
+                        selected = res.id;
+                        load();
+                    })
+                    .fail(function () { kendo.alert("Could not save the department."); });
+            });
+
+            $("#deleteDept").on("click", function () {
+                var dept = departments.find(function (d) { return d.departmentId === selected; });
+                if (!dept) return;
+                kendo.confirm("Delete " + kendo.htmlEncode(dept.name) + "? Its " + dept.memberCount + " employee(s) will become unassigned.")
+                    .then(function () {
+                        post("/Admin/Departments/Delete", { id: dept.departmentId })
+                            .done(function (res) { if (!res.success) kendo.alert(res.message); selected = null; load(); })
+                            .fail(function () { kendo.alert("Could not delete the department."); });
+                    });
+            });
+
+            $("#addMembersBtn").on("click", function () {
+                var ids = addMembers.value();
+                if (!ids.length) { kendo.alert("Choose at least one employee."); return; }
+                post("/Admin/Departments/Assign", { empIds: ids, departmentId: selected })
+                    .done(function (res) { if (!res.success) kendo.alert(res.message); load(); })
+                    .fail(function () { kendo.alert("Could not add the employees."); });
+            });
+
+            $("#memberGrid").on("click", ".js-remove", function () {
+                post("/Admin/Departments/Assign", { empIds: [$(this).data("id")], departmentId: null })
+                    .done(function (res) { if (!res.success) kendo.alert(res.message); load(); })
+                    .fail(function () { kendo.alert("Could not remove the employee."); });
+            });
+
+            load();
+        });
+    </script>
+}

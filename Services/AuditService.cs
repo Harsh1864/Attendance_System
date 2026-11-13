@@ -33,6 +33,10 @@ namespace project.Services
         public const string CorrectionCancelled = "CorrectionCancelled";
         public const string CorrectionApproved = "CorrectionApproved";
         public const string CorrectionRejected = "CorrectionRejected";
+        public const string DepartmentCreated = "DepartmentCreated";
+        public const string DepartmentUpdated = "DepartmentUpdated";
+        public const string DepartmentDeleted = "DepartmentDeleted";
+        public const string DepartmentMembersChanged = "DepartmentMembersChanged";
     }
 
     public class AuditService

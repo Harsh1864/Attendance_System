@@ -184,6 +184,8 @@
                 activeItem = 'Employee';
             } else if (currentPath.includes('/AdminAttendance')) {
                 activeItem = 'Summary';
+            } else if (currentPath.includes('/Admin/Departments')) {
+                activeItem = 'Departments';
             } else if (currentPath.includes('/Admin/Corrections')) {
                 activeItem = 'Corrections';
             } else if (currentPath.includes('/Admin/AttendanceEdit')) {
@@ -209,6 +211,10 @@
                         <li data-role='drawer-item' class='${activeItem === 'Employee' ? 'k-selected' : ''}' data-route='Employee'>
                             <span class='k-icon k-i-user'></span>
                             <span class='k-item-text'>Employee</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeItem === 'Departments' ? 'k-selected' : ''}' data-route='Departments'>
+                            <span class='k-icon k-i-folder'></span>
+                            <span class='k-item-text'>Departments</span>
                         </li>
                         <li data-role='drawer-item' class='${activeItem === 'Summary' ? 'k-selected' : ''}' data-route='Summary'>
                             <span class='k-icon k-i-calendar'></span>
@@ -259,6 +265,9 @@
                             break;
                         case "Summary":
                             window.location.href = '/Admin/AdminAttendance';
+                            break;
+                        case "Departments":
+                            window.location.href = '/Admin/Departments';
                             break;
                         case "Corrections":
                             window.location.href = '/Admin/Corrections';

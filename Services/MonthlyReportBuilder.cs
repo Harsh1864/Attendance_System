@@ -23,7 +23,7 @@ namespace project.Services
         public const string NoRecord = "NoRecord";
         public const string Future = "Future";
 
-        public record EmployeeInfo(int EmpId, string Name, string Status);
+        public record EmployeeInfo(int EmpId, string Name, string Status, string? Department = null);
 
         public static (DateTime start, DateTime end) MonthRange(int year, int month)
         {
@@ -113,6 +113,7 @@ namespace project.Services
             {
                 EmpId = emp.EmpId,
                 EmpName = emp.Name,
+                Department = emp.Department,
                 Status = emp.Status,
                 WorkingDays = workingDays,
                 PresentDays = worked.Count,
@@ -175,11 +176,11 @@ namespace project.Services
             Row("Month", report.MonthName);
             Row("Working days", report.WorkingDays.ToString(CultureInfo.InvariantCulture));
             Row();
-            Row("Employee ID", "Employee", "Status", "Working Days", "Present", "Late", "Early Out", "Absent",
+            Row("Employee ID", "Employee", "Department", "Status", "Working Days", "Present", "Late", "Early Out", "Absent",
                 "Leave", "No Record", "Total Hours", "Avg Hours", "Attendance %");
             foreach (var r in report.Rows)
             {
-                Row(r.EmpId.ToString(CultureInfo.InvariantCulture), r.EmpName, r.Status,
+                Row(r.EmpId.ToString(CultureInfo.InvariantCulture), r.EmpName, r.Department, r.Status,
                     r.WorkingDays.ToString(CultureInfo.InvariantCulture),
                     r.PresentDays.ToString(CultureInfo.InvariantCulture),
                     r.LateDays.ToString(CultureInfo.InvariantCulture),

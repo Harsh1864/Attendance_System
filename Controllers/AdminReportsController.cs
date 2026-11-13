@@ -19,12 +19,12 @@ namespace project.Controllers
         public IActionResult Index() => View("~/Views/Admin/Reports.cshtml");
 
         [HttpGet("Monthly")]
-        public async Task<IActionResult> Monthly(int? year, int? month)
+        public async Task<IActionResult> Monthly(int? year, int? month, int? departmentId)
         {
             var (y, m) = Resolve(year, month);
             var error = ReportService.ValidateMonth(y, m, DateTime.Today);
             if (error != null) return BadRequest(error);
-            return Json(await _reports.GetMonthlyAsync(y, m, DateTime.Today));
+            return Json(await _reports.GetMonthlyAsync(y, m, DateTime.Today, departmentId));
         }
 
         [HttpGet("Employee")]
@@ -39,13 +39,13 @@ namespace project.Controllers
         }
 
         [HttpGet("MonthlyCsv")]
-        public async Task<IActionResult> MonthlyCsv(int? year, int? month)
+        public async Task<IActionResult> MonthlyCsv(int? year, int? month, int? departmentId)
         {
             var (y, m) = Resolve(year, month);
             var error = ReportService.ValidateMonth(y, m, DateTime.Today);
             if (error != null) return BadRequest(error);
 
-            var report = await _reports.GetMonthlyAsync(y, m, DateTime.Today);
+            var report = await _reports.GetMonthlyAsync(y, m, DateTime.Today, departmentId);
             var bytes = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(MonthlyReportBuilder.ToCsv(report))).ToArray();
             return File(bytes, "text/csv", $"monthly_report_{y:0000}_{m:00}.csv");
         }
