@@ -340,6 +340,12 @@ namespace try_project_casepoint.Services
             WHERE e.c_status = 'Active'
               AND e.c_empid != 1
               AND NOT EXISTS (SELECT 1 FROM t_aholiday h WHERE h.c_date = CURRENT_DATE)
+              AND NOT EXISTS (
+                  SELECT 1 FROM t_aleave l
+                   WHERE l.c_empid = e.c_empid
+                     AND l.c_status = 'Approved'
+                     AND CURRENT_DATE BETWEEN l.c_fromdate AND l.c_todate
+              )
               AND e.c_empid NOT IN (
                   SELECT a.c_empid 
                   FROM t_aattendance a 
