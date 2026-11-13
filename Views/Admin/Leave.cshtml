@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = "Leave Requests";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Leave Requests</h3>
+
+    <div class="filter-bar">
+        <div class="field">
+            <label for="leaveStatus">Status</label>
+            <input id="leaveStatus" style="width: 160px;" />
+        </div>
+        <div class="field">
+            <label for="leaveFrom">From</label>
+            <input id="leaveFrom" style="width: 170px;" />
+        </div>
+        <div class="field">
+            <label for="leaveTo">To</label>
+            <input id="leaveTo" style="width: 170px;" />
+        </div>
+        <button id="leaveApply" class="btn-orange">Apply</button>
+        <span class="ms-auto text-muted" id="pendingInfo"></span>
+    </div>
+
+    <div class="panel">
+        <div id="leaveGrid"></div>
+    </div>
+</div>
+
+<div id="reviewDialog" style="display:none;">
+    <p id="reviewSummary" class="mb-2"></p>
+    <label for="reviewNote" class="form-label">Note to employee <span id="noteRequired" class="text-danger">(required)</span></label>
+    <textarea id="reviewNote" class="k-textarea w-100" rows="3" maxlength="500"></textarea>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+            function ymd(d) { return kendo.toString(d, "yyyy-MM-dd"); }
+            function badge(s) { return "<span class='badge-status badge-" + s.toLowerCase() + "'>" + kendo.htmlEncode(s) + "</span>"; }
+
+            var from = new Date(); from.setMonth(from.getMonth() - 1);
+            var to = new Date(); to.setMonth(to.getMonth() + 3);
+
+            var statusList = $("#leaveStatus").kendoDropDownList({
+                dataSource: [
+                    { text: "Pending", value: "Pending" },
+                    { text: "Approved", value: "Approved" },
+                    { text: "Rejected", value: "Rejected" },
+                    { text: "Cancelled", value: "Cancelled" },
+                    { text: "All", value: "" }
+                ],
+                dataTextField: "text", dataValueField: "value", value: "Pending"
+            }).data("kendoDropDownList");
+            var fromPicker = $("#leaveFrom").kendoDatePicker({ format: "dd-MMM-yyyy", value: from }).data("kendoDatePicker");
+            var toPicker = $("#leaveTo").kendoDatePicker({ format: "dd-MMM-yyyy", value: to }).data("kendoDatePicker");
+
+            var grid = $("#leaveGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/Admin/Leave/List", dataType: "json",
+                            data: function () { return { status: statusList.value(), from: ymd(fromPicker.value()), to: ymd(toPicker.value()) }; }
+                        }
+                    },
+                    schema: {
+                        model: {
+                            id: "leaveId",
+                            fields: {
+                                fromDate: { type: "date" }, toDate: { type: "date" }, createdAt: { type: "date" },
+                                reviewedAt: { type: "date" }, days: { type: "number" }, empName: { type: "string" }
+                            }
+                        }
+                    },
+                    pageSize: 20
+                },
+                sortable: true,
+                filterable: { mode: "row" },
+                pageable: { pageSizes: [20, 50, 100], buttonCount: 5 },
+                noRecords: { template: "<div class='empty-state'>No leave requests for these filters.</div>" },
+                columns: [
+                    { field: "empName", title: "Employee", width: 170, filterable: { cell: { operator: "contains", showOperators: false } } },
+                    { field: "leaveType", title: "Type", width: 100, filterable: false },
+                    {
+                        field: "fromDate", title: "Dates", width: 200, filterable: false,
+                        template: function (r) {
+                            var a = kendo.toString(r.fromDate, "dd-MMM-yyyy"), b = kendo.toString(r.toDate, "dd-MMM-yyyy");
+                            return a === b ? a + (r.halfDay ? " (half)" : "") : a + " &ndash; " + b;
+                        }
+                    },
+                    { field: "days", title: "Days", width: 70, format: "{0:0.#}", filterable: false },
+                    { field: "reason", title: "Reason", encoded: true, filterable: false },
+                    { field: "createdAt", title: "Requested", width: 120, format: "{0:dd-MMM-yyyy}", filterable: false },
+                    {
+                        field: "status", title: "Status", width: 150, filterable: false,
+                        template: function (r) {
+                            var html = badge(r.status);
+                            if (r.reviewedByName) html += "<div class='small text-muted'>by " + kendo.htmlEncode(r.reviewedByName) + "</div>";
+                            if (r.reviewNote) html += "<div class='small text-muted'>" + kendo.htmlEncode(r.reviewNote) + "</div>";
+                            return html;
+                        }
+                    },
+                    {
+                        title: "", width: 180, filterable: false,
+                        template: function (r) {
+                            if (r.status !== "Pending") return "";
+                            return "<button class='btn-orange btn-sm js-review' data-id='" + r.leaveId + "' data-decision='approve'>Approve</button> " +
+                                   "<button class='btn-outline-orange btn-sm js-review' data-id='" + r.leaveId + "' data-decision='reject'>Reject</button>";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            function refresh() {
+                grid.dataSource.read();
+                $.getJSON("/Admin/Leave/PendingCount").done(function (r) {
+                    $("#pendingInfo").text(r.count === 0 ? "No requests waiting for review." : r.count + " request(s) waiting for review.");
+                });
+            }
+
+            $("#leaveApply").on("click", function () {
+                if (fromPicker.value() > toPicker.value()) { kendo.alert("'From' must be on or before 'To'."); return; }
+                refresh();
+            });
+
+            var dialog = $("#reviewDialog").kendoDialog({
+                width: 460, visible: false, modal: true, closable: true,
+                actions: [
+                    { text: "Cancel" },
+                    { text: "Confirm", primary: true, action: function () { submitReview(); return false; } }
+                ]
+            }).data("kendoDialog");
+
+            var pending = null;
+
+            $("#leaveGrid").on("click", ".js-review", function () {
+                var id = $(this).data("id"), decision = $(this).data("decision");
+                var item = grid.dataSource.get(id);
+                pending = { id: id, decision: decision };
+                $("#reviewSummary").html(
+                    "<strong>" + (decision === "approve" ? "Approve" : "Reject") + "</strong> " +
+                    kendo.htmlEncode(item.empName) + "'s " + kendo.htmlEncode(item.leaveType) + " leave (" +
+                    kendo.toString(item.days, "0.#") + " day(s))?");
+                $("#noteRequired").toggle(decision === "reject");
+                $("#reviewNote").val("");
+                dialog.title(decision === "approve" ? "Approve leave" : "Reject leave").open();
+            });
+
+            function submitReview() {
+                if (!pending) return;
+                var note = $.trim($("#reviewNote").val());
+                if (pending.decision === "reject" && !note) { kendo.alert("Please give a reason when rejecting."); return; }
+                $.post("/Admin/Leave/Review", {
+                    __RequestVerificationToken: token(), id: pending.id, decision: pending.decision, note: note
+                }).done(function (res) {
+                    if (!res.success) { kendo.alert(res.message); return; }
+                    dialog.close();
+                    pending = null;
+                    refresh();
+                }).fail(function () { kendo.alert("Could not save the decision."); });
+            }
+
+            refresh();
+        });
+    </script>
+}
