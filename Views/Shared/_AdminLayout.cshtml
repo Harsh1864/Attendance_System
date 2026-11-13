@@ -183,6 +183,8 @@
                 activeItem = 'Employee';
             } else if (currentPath.includes('/AdminAttendance')) {
                 activeItem = 'Summary';
+            } else if (currentPath.includes('/Holidays')) {
+                activeItem = 'Holidays';
             } else if (currentPath.includes('/AuditLog')) {
                 activeItem = 'AuditLog';
             }
@@ -202,6 +204,10 @@
                         <li data-role='drawer-item' class='${activeItem === 'Summary' ? 'k-selected' : ''}' data-route='Summary'>
                             <span class='k-icon k-i-calendar'></span>
                             <span class='k-item-text'>Summary</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeItem === 'Holidays' ? 'k-selected' : ''}' data-route='Holidays'>
+                            <span class='k-icon k-i-star'></span>
+                            <span class='k-item-text'>Holidays</span>
                         </li>
                         <li data-role='drawer-item' class='${activeItem === 'AuditLog' ? 'k-selected' : ''}' data-route='AuditLog'>
                             <span class='k-icon k-i-track-changes'></span>
@@ -228,6 +234,9 @@
                             break;
                         case "Summary":
                             window.location.href = '/Admin/AdminAttendance';
+                            break;
+                        case "Holidays":
+                            window.location.href = '/Admin/Holidays';
                             break;
                         case "AuditLog":
                             window.location.href = '/Admin/AuditLog';

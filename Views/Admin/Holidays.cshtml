@@ -1,0 +1,127 @@
+@{
+    ViewData["Title"] = "Holidays";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Holiday Calendar</h3>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="panel">
+                <div class="panel-title">Add a holiday</div>
+                <div class="mb-3">
+                    <label for="holidayDate" class="form-label">Date</label>
+                    <input id="holidayDate" style="width: 100%;" />
+                </div>
+                <div class="mb-3">
+                    <label for="holidayName" class="form-label">Name</label>
+                    <input id="holidayName" class="k-textbox" maxlength="100" style="width: 100%;" placeholder="e.g. Diwali" />
+                </div>
+                <button id="holidayAdd" class="btn-orange w-100">Add holiday</button>
+                <p class="text-muted small mt-3 mb-0">
+                    Nobody is marked absent on a holiday, and holidays are not counted as leave days.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="panel-title mb-0">Holidays in <span id="yearLabel"></span></div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <button id="prevYear" class="btn-outline-orange">&lsaquo;</button>
+                        <input id="yearPicker" style="width: 110px;" />
+                        <button id="nextYear" class="btn-outline-orange">&rsaquo;</button>
+                    </div>
+                </div>
+                <div id="holidayGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+
+            var datePicker = $("#holidayDate").kendoDatePicker({ format: "dd-MMM-yyyy", value: new Date() }).data("kendoDatePicker");
+            var yearPicker = $("#yearPicker").kendoNumericTextBox({
+                format: "0", decimals: 0, min: 2000, max: 2100, value: new Date().getFullYear(),
+                change: reload, spin: reload
+            }).data("kendoNumericTextBox");
+
+            $("#prevYear").on("click", function () { yearPicker.value(yearPicker.value() - 1); reload(); });
+            $("#nextYear").on("click", function () { yearPicker.value(yearPicker.value() + 1); reload(); });
+
+            var grid = $("#holidayGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/Admin/Holidays/List",
+                            dataType: "json",
+                            data: function () { return { year: yearPicker.value() }; }
+                        }
+                    },
+                    schema: { model: { id: "holidayId", fields: { date: { type: "date" }, name: { type: "string" }, dayOfWeek: { type: "string" } } } },
+                    sort: { field: "date", dir: "asc" }
+                },
+                sortable: true,
+                noRecords: { template: "<div class='empty-state'>No holidays added for this year.</div>" },
+                columns: [
+                    { field: "date", title: "Date", width: 150, format: "{0:dd-MMM-yyyy}" },
+                    { field: "dayOfWeek", title: "Day", width: 120 },
+                    { field: "name", title: "Holiday" },
+                    {
+                        title: "", width: 110,
+                        template: "<button class='btn-outline-orange btn-sm js-remove' data-id='#= holidayId #'>Remove</button>"
+                    }
+                ]
+            }).data("kendoGrid");
+
+            function reload() {
+                $("#yearLabel").text(yearPicker.value());
+                grid.dataSource.read();
+            }
+            reload();
+
+            $("#holidayAdd").on("click", function () {
+                var date = datePicker.value();
+                var name = $.trim($("#holidayName").val());
+                if (!date || !name) { kendo.alert("Please choose a date and enter a name."); return; }
+
+                $.post("/Admin/Holidays/Add", {
+                    __RequestVerificationToken: token(),
+                    date: kendo.toString(date, "yyyy-MM-dd"),
+                    name: name
+                }).done(function (res) {
+                    if (!res.success) { kendo.alert(res.message); return; }
+                    $("#holidayName").val("");
+                    yearPicker.value(date.getFullYear());
+                    reload();
+                }).fail(function () { kendo.alert("Could not add the holiday."); });
+            });
+
+            $("#holidayGrid").on("click", ".js-remove", function () {
+                var id = $(this).data("id");
+                var item = grid.dataSource.get(id);
+                kendo.confirm("Remove " + kendo.htmlEncode(item.name) + " (" + kendo.toString(item.date, "dd-MMM-yyyy") + ")?")
+                    .then(function () {
+                        $.post("/Admin/Holidays/Remove", { __RequestVerificationToken: token(), id: id })
+                            .done(function (res) {
+                                if (!res.success) { kendo.alert(res.message); return; }
+                                reload();
+                            })
+                            .fail(function () { kendo.alert("Could not remove the holiday."); });
+                    });
+            });
+        });
+    </script>
+}
