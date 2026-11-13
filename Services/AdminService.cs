@@ -83,6 +83,56 @@ namespace try_project_casepoint.Services
             return AttendanceList;
         }
 
+        /// <summary>Attendance rows between two dates (inclusive), newest first, excluding the admin.</summary>
+        public async Task<List<AttendanceModel>> GetAttendanceInRange(DateTime from, DateTime to)
+        {
+            var list = new List<AttendanceModel>();
+            const string query = @"
+                SELECT a.c_attendid, a.c_empid, e.c_name AS empname, a.c_attenddate,
+                       a.c_clockinhour, a.c_clockinmin, a.c_clockouthour, a.c_clockoutmin,
+                       a.c_worktype, a.c_tasktype, a.c_workinghour, a.c_attendstatus
+                  FROM t_aattendance a
+                  INNER JOIN t_aemployee e ON a.c_empid = e.c_empid
+                 WHERE a.c_attenddate BETWEEN @from AND @to
+                   AND e.c_empid != 1
+                 ORDER BY a.c_attenddate DESC, e.c_name ASC;";
+            try
+            {
+                using var cmd = new NpgsqlCommand(query, _conn);
+                cmd.Parameters.AddWithValue("from", from.Date);
+                cmd.Parameters.AddWithValue("to", to.Date);
+
+                if (_conn.State != System.Data.ConnectionState.Open)
+                    await _conn.OpenAsync();
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    list.Add(new AttendanceModel
+                    {
+                        AttendId = Convert.ToInt32(reader["c_attendid"]),
+                        EmpId = Convert.ToInt32(reader["c_empid"]),
+                        EmpName = reader["empname"].ToString() ?? "",
+                        AttendDate = Convert.ToDateTime(reader["c_attenddate"]),
+                        ClockInHour = reader["c_clockinhour"] == DBNull.Value ? 0 : Convert.ToInt32(reader["c_clockinhour"]),
+                        ClockInMin = reader["c_clockinmin"] == DBNull.Value ? 0 : Convert.ToInt32(reader["c_clockinmin"]),
+                        ClockOutHour = reader["c_clockouthour"] == DBNull.Value ? 0 : Convert.ToInt32(reader["c_clockouthour"]),
+                        ClockOutMin = reader["c_clockoutmin"] == DBNull.Value ? 0 : Convert.ToInt32(reader["c_clockoutmin"]),
+                        WorkType = reader["c_worktype"] == DBNull.Value ? "" : reader["c_worktype"].ToString() ?? "",
+                        TaskType = reader["c_tasktype"] == DBNull.Value ? "" : reader["c_tasktype"].ToString(),
+                        WorkingHour = reader["c_workinghour"] == DBNull.Value ? 0 : Convert.ToInt32(reader["c_workinghour"]),
+                        AttendStatus = reader["c_attendstatus"] == DBNull.Value ? "" : reader["c_attendstatus"].ToString() ?? "",
+                    });
+                }
+            }
+            finally
+            {
+                if (_conn.State == System.Data.ConnectionState.Open)
+                    await _conn.CloseAsync();
+            }
+            return list;
+        }
+
         public async Task<DashboardSummaryModel> GetDashboardSummary(DateTime? date = null)
         {
             var summary = new DashboardSummaryModel();

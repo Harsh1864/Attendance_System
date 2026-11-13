@@ -294,6 +294,13 @@
         <button id="exportAllPdf" class="btn btn-custom-pdf">
             <i class="k-icon k-i-file-pdf"></i> Export All to PDF
         </button>
+        <span class="ms-3 filter-label">CSV from</span>
+        <input id="csvFrom" style="width: 160px;" />
+        <span class="filter-label">to</span>
+        <input id="csvTo" style="width: 160px;" />
+        <button id="exportCsv" class="btn btn-custom-secondary">
+            <i class="k-icon k-i-file-csv"></i> Export CSV
+        </button>
     </div>
 
     <!-- 🔹 Grid Container -->
@@ -322,6 +329,21 @@
 
             $("#exportAllPdf").click(function () {
                 exportAllToPdf();
+            });
+
+            var today = new Date();
+            var monthAgo = new Date(); monthAgo.setDate(today.getDate() - 29);
+            $("#csvFrom").kendoDatePicker({ format: "dd-MMM-yyyy", value: monthAgo });
+            $("#csvTo").kendoDatePicker({ format: "dd-MMM-yyyy", value: today });
+
+            $("#exportCsv").click(function () {
+                var from = $("#csvFrom").data("kendoDatePicker").value();
+                var to = $("#csvTo").data("kendoDatePicker").value();
+                if (!from || !to) { kendo.alert("Please choose both dates."); return; }
+                if (from > to) { kendo.alert("'From' must be before 'To'."); return; }
+                var url = "/Admin/ExportAttendanceCsv?from=" + kendo.toString(from, "yyyy-MM-dd") +
+                          "&to=" + kendo.toString(to, "yyyy-MM-dd");
+                window.location.href = url;
             });
 
             function loadGrid() {

@@ -81,6 +81,31 @@ namespace project.Controllers
             return Json(attendanceList);
         }
 
+        /// <summary>
+        /// Downloads attendance as CSV. Defaults to the last 30 days.
+        /// Example: /Admin/ExportAttendanceCsv?from=2026-11-01&amp;to=2026-11-30
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ExportAttendanceCsv(DateTime? from, DateTime? to)
+        {
+            var end = (to ?? DateTime.Today).Date;
+            var start = (from ?? end.AddDays(-29)).Date;
+
+            if (start > end)
+                return BadRequest("'from' must be on or before 'to'.");
+            if ((end - start).TotalDays > 366)
+                return BadRequest("Date range cannot exceed one year.");
+
+            var rows = await _adminService.GetAttendanceInRange(start, end);
+            var csv = project.Services.CsvExport.BuildAttendanceCsv(rows);
+
+            // UTF-8 with BOM so Excel shows non-ASCII names correctly.
+            var bytes = System.Text.Encoding.UTF8.GetPreamble()
+                .Concat(System.Text.Encoding.UTF8.GetBytes(csv)).ToArray();
+            var fileName = $"attendance_{start:yyyyMMdd}_{end:yyyyMMdd}.csv";
+            return File(bytes, "text/csv", fileName);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetDashboardSummary(DateTime? date)
         {
