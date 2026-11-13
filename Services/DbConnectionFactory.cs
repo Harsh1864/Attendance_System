@@ -16,9 +16,11 @@ namespace project.Services
 
         public DbConnectionFactory(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("Default")
-                ?? throw new System.InvalidOperationException(
+            var cs = configuration.GetConnectionString("Default");
+            if (string.IsNullOrWhiteSpace(cs))
+                throw new System.InvalidOperationException(
                     "Connection string 'Default' is not configured. See README: Configure.");
+            _connectionString = cs;
         }
 
         public async Task<NpgsqlConnection> OpenAsync(CancellationToken ct = default)

@@ -7,6 +7,24 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Secrets never live in appsettings.json. Supply the connection string with
+// one of (later wins): appsettings.Local.json (git-ignored), user secrets
+// (Development only), or the ConnectionStrings__Default environment variable.
+builder.Configuration
+    .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+if (builder.Environment.IsDevelopment())
+    builder.Configuration.AddUserSecrets<Program>(optional: true);
+builder.Configuration.AddEnvironmentVariables();
+
+if (string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("Default")))
+{
+    throw new InvalidOperationException(
+        "Connection string 'Default' is not set. Use one of:\n" +
+        "  dotnet user-secrets set \"ConnectionStrings:Default\" \"Host=...;Database=...;Username=...;Password=...\"\n" +
+        "  set ConnectionStrings__Default=Host=...;Database=...;Username=...;Password=...\n" +
+        "  or create appsettings.Local.json (git-ignored). See README.md.");
+}
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 

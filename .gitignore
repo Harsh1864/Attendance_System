@@ -42,3 +42,7 @@ Desktop.ini
 # Local secrets
 *.env
 .env
+
+# Local configuration with secrets (see README)
+appsettings.Local.json
+appsettings.*.Local.json
