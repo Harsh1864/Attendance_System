@@ -1,0 +1,232 @@
+@{
+    ViewData["Title"] = "Edit Attendance";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var workTypes = (string[])ViewBag.WorkTypes;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Edit Attendance</h3>
+
+    <div class="filter-bar">
+        <div class="field">
+            <label for="fEmployee">Employee</label>
+            <input id="fEmployee" style="width: 220px;" />
+        </div>
+        <div class="field">
+            <label for="fFrom">From</label>
+            <input id="fFrom" style="width: 170px;" />
+        </div>
+        <div class="field">
+            <label for="fTo">To</label>
+            <input id="fTo" style="width: 170px;" />
+        </div>
+        <button id="fApply" class="btn-orange">Search</button>
+        <button id="addRecord" class="btn-outline-orange ms-auto">+ Add record</button>
+    </div>
+
+    <div class="panel">
+        <div id="editGrid"></div>
+    </div>
+</div>
+
+<div id="editWindow" style="display:none;">
+    <input type="hidden" id="eAttendId" />
+    <div class="form-grid">
+        <div style="grid-column: 1 / -1;">
+            <label for="eEmployee">Employee</label>
+            <input id="eEmployee" style="width: 100%;" />
+        </div>
+        <div>
+            <label for="eDate">Date</label>
+            <input id="eDate" style="width: 100%;" />
+        </div>
+        <div class="d-flex align-items-end">
+            <label class="d-flex align-items-center gap-2 mb-1">
+                <input type="checkbox" id="eAbsent" class="k-checkbox" /> Mark as absent
+            </label>
+        </div>
+        <div class="js-times">
+            <label for="eIn">Clock in</label>
+            <input id="eIn" style="width: 100%;" />
+        </div>
+        <div class="js-times">
+            <label for="eOut">Clock out</label>
+            <input id="eOut" style="width: 100%;" />
+        </div>
+        <div class="js-times">
+            <label for="eWork">Work type</label>
+            <select id="eWork" style="width: 100%;">
+                @foreach (var w in workTypes)
+                {
+                    <option value="@w">@w</option>
+                }
+            </select>
+        </div>
+        <div class="js-times">
+            <label for="eTasks">Tasks</label>
+            <input id="eTasks" class="k-textbox" maxlength="100" style="width: 100%;" placeholder="Comma separated" />
+        </div>
+        <div style="grid-column: 1 / -1;">
+            <label for="eReason">Reason for change <span class="text-danger">*</span></label>
+            <textarea id="eReason" class="k-textarea w-100" rows="2" maxlength="300"
+                      placeholder="e.g. Employee forgot to check out"></textarea>
+        </div>
+    </div>
+    <p class="text-muted small mt-2 mb-3">Status and hours are worked out from the times using the shift rules.</p>
+    <div class="d-flex justify-content-end gap-2">
+        <button id="eCancel" class="btn-outline-orange">Cancel</button>
+        <button id="eSave" class="btn-orange">Save</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+            function ymd(d) { return kendo.toString(d, "yyyy-MM-dd"); }
+            function hm(d) { return d ? kendo.toString(d, "HH:mm") : ""; }
+            function statusBadge(s) {
+                var cls = s === "Absent" ? "absent" : s === "Regular" ? "regular" : "late";
+                return "<span class='badge-status badge-" + cls + "'>" + kendo.htmlEncode(s) + "</span>";
+            }
+
+            var today = new Date(); today.setHours(0, 0, 0, 0);
+            var twoWeeksAgo = new Date(today); twoWeeksAgo.setDate(today.getDate() - 13);
+            var yearAgo = new Date(today); yearAgo.setFullYear(today.getFullYear() - 1);
+
+            var employees = new kendo.data.DataSource({
+                transport: { read: { url: "/Admin/GetAllEmployeesDetails", dataType: "json" } },
+                schema: { parse: function (rows) { return rows.filter(function (e) { return e.role !== "Admin" && e.empId !== 1; }); } },
+                sort: { field: "empName", dir: "asc" }
+            });
+
+            var fEmployee = $("#fEmployee").kendoDropDownList({
+                dataSource: employees, dataTextField: "empName", dataValueField: "empId",
+                optionLabel: "All employees", filter: "contains"
+            }).data("kendoDropDownList");
+            var fFrom = $("#fFrom").kendoDatePicker({ format: "dd-MMM-yyyy", value: twoWeeksAgo, max: today }).data("kendoDatePicker");
+            var fTo = $("#fTo").kendoDatePicker({ format: "dd-MMM-yyyy", value: today, max: today }).data("kendoDatePicker");
+
+            var grid = $("#editGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/Admin/AttendanceEdit/Search", dataType: "json",
+                            data: function () {
+                                return { empId: fEmployee.value() || null, from: ymd(fFrom.value()), to: ymd(fTo.value()) };
+                            }
+                        }
+                    },
+                    schema: { model: { id: "attendId", fields: { date: { type: "date" }, workingHours: { type: "number", nullable: true } } } },
+                    pageSize: 25
+                },
+                sortable: true,
+                pageable: { pageSizes: [25, 50, 100], buttonCount: 5 },
+                noRecords: { template: "<div class='empty-state'>No attendance records for these filters.</div>" },
+                columns: [
+                    { field: "date", title: "Date", width: 130, format: "{0:dd-MMM-yyyy}" },
+                    { field: "empName", title: "Employee", width: 170 },
+                    { field: "clockIn", title: "In", width: 80 },
+                    { field: "clockOut", title: "Out", width: 80 },
+                    { field: "workingHours", title: "Hours", width: 75 },
+                    { field: "workType", title: "Work type", width: 100 },
+                    { field: "taskType", title: "Tasks", encoded: true },
+                    { field: "status", title: "Status", width: 110, template: function (r) { return statusBadge(r.status); } },
+                    {
+                        title: "", width: 160,
+                        template: function (r) {
+                            return "<button class='btn-outline-orange btn-sm js-edit' data-id='" + r.attendId + "'>Edit</button> " +
+                                   "<button class='btn-outline-orange btn-sm js-delete' data-id='" + r.attendId + "'>Delete</button>";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            $("#fApply").on("click", function () {
+                if (fFrom.value() > fTo.value()) { kendo.alert("'From' must be on or before 'To'."); return; }
+                grid.dataSource.read();
+            });
+
+            // ---- Edit window ------------------------------------------------
+            var win = $("#editWindow").kendoWindow({ width: 560, modal: true, visible: false, resizable: false }).data("kendoWindow");
+            var eEmployee = $("#eEmployee").kendoDropDownList({
+                dataSource: employees, dataTextField: "empName", dataValueField: "empId", optionLabel: "Choose employee", filter: "contains"
+            }).data("kendoDropDownList");
+            var eDate = $("#eDate").kendoDatePicker({ format: "dd-MMM-yyyy", max: today, min: yearAgo }).data("kendoDatePicker");
+            var eIn = $("#eIn").kendoTimePicker({ format: "HH:mm", interval: 15 }).data("kendoTimePicker");
+            var eOut = $("#eOut").kendoTimePicker({ format: "HH:mm", interval: 15 }).data("kendoTimePicker");
+            var eWork = $("#eWork").kendoDropDownList().data("kendoDropDownList");
+
+            function toggleAbsent() { $(".js-times").toggle(!$("#eAbsent").is(":checked")); }
+            $("#eAbsent").on("change", toggleAbsent);
+
+            function parseTime(s) { return s ? kendo.parseDate(s, "HH:mm") : null; }
+
+            function openEditor(record) {
+                $("#eAttendId").val(record ? record.attendId : "");
+                eEmployee.value(record ? record.empId : (fEmployee.value() || ""));
+                eEmployee.enable(!record);
+                eDate.value(record ? record.date : today);
+                $("#eAbsent").prop("checked", record ? record.status === "Absent" : false);
+                eIn.value(record ? parseTime(record.clockIn) : parseTime("09:00"));
+                eOut.value(record ? parseTime(record.clockOut) : parseTime("17:00"));
+                eWork.value(record && record.workType ? record.workType : "Office");
+                $("#eTasks").val(record && record.taskType ? record.taskType : "");
+                $("#eReason").val("");
+                toggleAbsent();
+                win.title(record ? "Edit record – " + record.empName : "Add attendance record").center().open();
+            }
+
+            $("#addRecord").on("click", function () { openEditor(null); });
+            $("#editGrid").on("click", ".js-edit", function () { openEditor(grid.dataSource.get($(this).data("id"))); });
+            $("#eCancel").on("click", function () { win.close(); });
+
+            $("#eSave").on("click", function () {
+                var reason = $.trim($("#eReason").val());
+                if (!eEmployee.value()) { kendo.alert("Please choose an employee."); return; }
+                if (!eDate.value()) { kendo.alert("Please choose a date."); return; }
+                if (!reason) { kendo.alert("Please give a reason for the change."); return; }
+
+                var btn = $(this).prop("disabled", true);
+                $.post("/Admin/AttendanceEdit/Save", {
+                    __RequestVerificationToken: token(),
+                    AttendId: $("#eAttendId").val() || null,
+                    EmpId: eEmployee.value(),
+                    Date: ymd(eDate.value()),
+                    Absent: $("#eAbsent").is(":checked"),
+                    ClockIn: hm(eIn.value()),
+                    ClockOut: hm(eOut.value()),
+                    WorkType: eWork.value(),
+                    TaskType: $("#eTasks").val(),
+                    Reason: reason
+                }).done(function (res) {
+                    if (!res.success) { kendo.alert(res.message); return; }
+                    win.close();
+                    grid.dataSource.read();
+                }).fail(function () {
+                    kendo.alert("Could not save the record.");
+                }).always(function () { btn.prop("disabled", false); });
+            });
+
+            // ---- Delete -----------------------------------------------------
+            $("#editGrid").on("click", ".js-delete", function () {
+                var item = grid.dataSource.get($(this).data("id"));
+                kendo.prompt("Delete " + kendo.htmlEncode(item.empName) + "'s record for " +
+                             kendo.toString(item.date, "dd-MMM-yyyy") + "? Enter a reason:", "")
+                    .then(function (reason) {
+                        reason = $.trim(reason || "");
+                        if (!reason) { kendo.alert("A reason is required to delete a record."); return; }
+                        $.post("/Admin/AttendanceEdit/Delete", { __RequestVerificationToken: token(), id: item.attendId, reason: reason })
+                            .done(function (res) { if (!res.success) kendo.alert(res.message); grid.dataSource.read(); })
+                            .fail(function () { kendo.alert("Could not delete the record."); });
+                    });
+            });
+        });
+    </script>
+}
