@@ -44,8 +44,18 @@ namespace try_project_casepoint.Controllers
         {
             try
             {
-                // int? empId = HttpContext.Session.GetInt32("EmpID");
-                // if (empId == null) return RedirectToAction("Login");
+                // Only allow editing your own profile; never trust the posted id.
+                var sessionId = HttpContext.Session.GetString("Ids");
+                if (!int.TryParse(sessionId, out var empId) || empId <= 0)
+                    return Json(new { success = false, message = "Session expired. Please log in again." });
+
+                if (string.IsNullOrWhiteSpace(employee.EmpName) || employee.EmpName.Length > 50)
+                    return Json(new { success = false, message = "Name is required (max 50 characters)." });
+
+                if (string.IsNullOrWhiteSpace(employee.Gender))
+                    return Json(new { success = false, message = "Gender is required." });
+
+                employee.EmpId = empId;
 
                 // Prevent password change
                 employee.EmpPassword = null;
