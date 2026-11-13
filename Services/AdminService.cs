@@ -99,8 +99,8 @@ namespace try_project_casepoint.Services
             try
             {
                 using var cmd = new NpgsqlCommand(query, _conn);
-                cmd.Parameters.AddWithValue("from", from.Date);
-                cmd.Parameters.AddWithValue("to", to.Date);
+                cmd.Parameters.AddWithValue("from", NpgsqlTypes.NpgsqlDbType.Date, from.Date);
+                cmd.Parameters.AddWithValue("to", NpgsqlTypes.NpgsqlDbType.Date, to.Date);
 
                 if (_conn.State != System.Data.ConnectionState.Open)
                     await _conn.OpenAsync();
@@ -167,42 +167,43 @@ namespace try_project_casepoint.Services
                 using (var cmd = new NpgsqlCommand("SELECT COUNT(*) FROM t_aemployee WHERE c_status='Inactive' AND c_empid != 1", _conn))
                     summary.InactiveEmployees = Convert.ToInt32(await cmd.ExecuteScalarAsync() ?? 0);
 
-                string dateFilter = date.HasValue ? $"AND a.c_attenddate = '{date.Value:yyyy-MM-dd}'" : "";
+                string dateFilter = "AND a.c_attenddate = @date";
+                var dateValue = date!.Value.Date;
+                NpgsqlCommand DateCmd(string sql)
+                {
+                    var c = new NpgsqlCommand(sql, _conn);
+                    c.Parameters.AddWithValue("date", NpgsqlTypes.NpgsqlDbType.Date, dateValue);
+                    return c;
+                }
 
-                using (var cmd = new NpgsqlCommand(
-                    $"SELECT COUNT(*) FROM t_aattendance a INNER JOIN t_aemployee e ON a.c_empid=e.c_empid WHERE a.c_attendstatus IN ('LateIn','EarlyOut', 'LateEarly') {dateFilter} {excludeAdmin}",
-                    _conn))
+                using (var cmd = DateCmd($"SELECT COUNT(*) FROM t_aattendance a INNER JOIN t_aemployee e ON a.c_empid=e.c_empid WHERE a.c_attendstatus IN ('LateIn','EarlyOut', 'LateEarly') {dateFilter} {excludeAdmin}"))
                 {
                     var result = await cmd.ExecuteScalarAsync();
                     summary.LateOrEarly = result == DBNull.Value ? 0 : Convert.ToInt32(result);
                 }
 
-                using (var cmd = new NpgsqlCommand(
-                    $"SELECT COALESCE(SUM(c_workinghour),0) FROM t_aattendance a INNER JOIN t_aemployee e ON a.c_empid=e.c_empid WHERE 1=1 {dateFilter} {excludeAdmin}",
-                    _conn))
+                using (var cmd = DateCmd($"SELECT COALESCE(SUM(c_workinghour),0) FROM t_aattendance a INNER JOIN t_aemployee e ON a.c_empid=e.c_empid WHERE 1=1 {dateFilter} {excludeAdmin}"))
                 {
                     var result = await cmd.ExecuteScalarAsync();
                     summary.TotalWorkingHours = result == DBNull.Value ? 0 : Convert.ToInt32(result);
                 }
 
-                using (var cmd = new NpgsqlCommand(
-                    $@"SELECT COUNT(*) 
+                using (var cmd = DateCmd($@"SELECT COUNT(*) 
        FROM t_aattendance a 
        INNER JOIN t_aemployee e ON a.c_empid = e.c_empid 
-       WHERE a.c_attendstatus = 'Absent' {dateFilter} {excludeAdmin}",
-                    _conn))
+       WHERE a.c_attendstatus = 'Absent' {dateFilter} {excludeAdmin}"))
                 {
                     var result = await cmd.ExecuteScalarAsync();
                     summary.TotalAbsent = result == DBNull.Value ? 0 : Convert.ToInt32(result);
                 }
 
 
-                using (var cmd = new NpgsqlCommand($@"
+                using (var cmd = DateCmd($@"
             SELECT c_tasktype, COUNT(*) AS count 
             FROM t_aattendance a 
             INNER JOIN t_aemployee e ON a.c_empid = e.c_empid
             WHERE 1=1 {dateFilter} {excludeAdmin}
-            GROUP BY c_tasktype", _conn))
+            GROUP BY c_tasktype"))
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
@@ -215,13 +216,13 @@ namespace try_project_casepoint.Services
                     }
                 }
 
-                using (var cmd = new NpgsqlCommand($@"
+                using (var cmd = DateCmd($@"
             SELECT e.c_name, COALESCE(SUM(a.c_workinghour),0) AS totalhours
             FROM t_aattendance a
             INNER JOIN t_aemployee e ON a.c_empid = e.c_empid
             WHERE 1=1 {dateFilter} {excludeAdmin}
             GROUP BY e.c_name
-            ORDER BY e.c_name", _conn))
+            ORDER BY e.c_name"))
                 using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     while (await reader.ReadAsync())
