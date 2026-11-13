@@ -36,6 +36,7 @@ namespace project.Middleware
             "/profile",
             "/profileupdate",
             "/leave",
+            "/myreport",
         };
 
         private readonly RequestDelegate _next;

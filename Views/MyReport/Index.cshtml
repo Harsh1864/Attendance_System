@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "My Report";
+    Layout = "../Shared/_EmployeeLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">My Monthly Report</h3>
+
+    <div class="filter-bar">
+        <button id="prevMonth" class="btn-outline-orange">&lsaquo; Previous</button>
+        <div class="field">
+            <label for="myMonth">Month</label>
+            <input id="myMonth" style="width: 180px;" />
+        </div>
+        <button id="nextMonth" class="btn-outline-orange">Next &rsaquo;</button>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-tile"><div class="stat-label">Attendance</div><div class="stat-value" id="sPct">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Present</div><div class="stat-value" id="sPresent">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Late</div><div class="stat-value" id="sLate">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Early out</div><div class="stat-value" id="sEarly">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Absent</div><div class="stat-value" id="sAbsent">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Leave</div><div class="stat-value" id="sLeave">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Hours</div><div class="stat-value" id="sHours">–</div></div>
+    </div>
+
+    <div class="panel">
+        <div id="myCalendar"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/month-calendar.js" asp-append-version="true"></script>
+    <script>
+        $(function () {
+            var now = new Date();
+            var thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            var picker = $("#myMonth").kendoDatePicker({
+                start: "year", depth: "year", format: "MMMM yyyy", value: thisMonth, max: thisMonth, change: load
+            }).data("kendoDatePicker");
+
+            function shift(by) {
+                var d = picker.value() || thisMonth;
+                var next = new Date(d.getFullYear(), d.getMonth() + by, 1);
+                if (next > thisMonth) return;
+                picker.value(next);
+                load();
+            }
+
+            $("#prevMonth").on("click", function () { shift(-1); });
+            $("#nextMonth").on("click", function () { shift(1); });
+
+            function load() {
+                var d = picker.value() || thisMonth;
+                $("#nextMonth").prop("disabled", d >= thisMonth);
+                $.getJSON("/MyReport/Month", { year: d.getFullYear(), month: d.getMonth() + 1 }).done(function (r) {
+                    var s = r.summary;
+                    $("#sPct").text(s.attendancePercent === null ? "–" : kendo.toString(s.attendancePercent, "0.0") + "%");
+                    $("#sPresent").text(s.presentDays + " / " + s.workingDays);
+                    $("#sLate").text(s.lateDays);
+                    $("#sEarly").text(s.earlyOutDays);
+                    $("#sAbsent").text(s.absentDays);
+                    $("#sLeave").text(kendo.toString(s.leaveDays, "0.#"));
+                    $("#sHours").text(s.totalHours);
+                    MonthCalendar.render($("#myCalendar"), r.days);
+                }).fail(function (xhr) {
+                    kendo.alert(xhr.responseText || "Could not load your report.");
+                });
+            }
+
+            load();
+        });
+    </script>
+}

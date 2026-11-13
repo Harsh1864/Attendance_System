@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -191,6 +191,8 @@
             
             if (currentPath.includes('/Profile')) {
                 activeKey = 'Profile';
+            } else if (currentPath.toLowerCase().startsWith('/myreport')) {
+                activeKey = 'MyReport';
             } else if (currentPath.toLowerCase().startsWith('/leave')) {
                 activeKey = 'Leave';
             }
@@ -201,6 +203,10 @@
                         <li data-role='drawer-item' class='${activeKey === 'Home' ? 'k-selected' : ''}' data-key='Home'>
                             <span class='k-icon k-i-home'></span>
                             <span class='k-item-text'>Home</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeKey === 'MyReport' ? 'k-selected' : ''}' data-key='MyReport'>
+                            <span class='k-icon k-i-chart-column-clustered'></span>
+                            <span class='k-item-text'>My Report</span>
                         </li>
                         <li data-role='drawer-item' class='${activeKey === 'Leave' ? 'k-selected' : ''}' data-key='Leave'>
                             <span class='k-icon k-i-calendar'></span>
@@ -225,6 +231,9 @@
                     switch (key) {
                         case "Home":
                             window.location.href = homeUrl;
+                            break;
+                        case "MyReport":
+                            window.location.href = '/MyReport/Index';
                             break;
                         case "Leave":
                             window.location.href = '/Leave/Index';
