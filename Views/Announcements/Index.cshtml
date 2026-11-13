@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Announcements";
+    Layout = (bool)ViewBag.IsAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "../Shared/_EmployeeLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<div class="container mt-4" style="max-width: 820px;">
+    <h3 class="text-center page-title">Announcements</h3>
+    <div id="annList"></div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $.getJSON("/Announcements/Active").done(function (items) {
+                if (!items.length) {
+                    $("#annList").html("<div class='panel empty-state'>There are no announcements right now.</div>");
+                    return;
+                }
+                $("#annList").html(items.map(function (a) {
+                    var start = kendo.toString(kendo.parseDate(a.startDate), "dd MMM yyyy");
+                    var end = a.endDate ? " – " + kendo.toString(kendo.parseDate(a.endDate), "dd MMM yyyy") : "";
+                    var badge = a.priority === "Important" ? "<span class='badge-status badge-pending ms-2'>Important</span>" : "";
+                    return "<div class='panel'>" +
+                        "<div class='d-flex justify-content-between align-items-start'>" +
+                        "<div class='panel-title mb-1'>" + kendo.htmlEncode(a.title) + badge + "</div>" +
+                        "<span class='small text-muted'>" + start + end + "</span></div>" +
+                        "<div style='white-space:pre-line'>" + kendo.htmlEncode(a.body) + "</div>" +
+                        (a.createdByName ? "<div class='small text-muted mt-2'>Posted by " + kendo.htmlEncode(a.createdByName) + "</div>" : "") +
+                        "</div>";
+                }).join(""));
+            });
+        });
+    </script>
+}

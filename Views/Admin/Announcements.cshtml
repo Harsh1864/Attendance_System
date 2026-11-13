@@ -1,0 +1,173 @@
+@{
+    ViewData["Title"] = "Announcements";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Announcements</h3>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="panel">
+                <div class="panel-title" id="formTitle">New announcement</div>
+                <input type="hidden" id="aId" />
+                <div class="mb-3">
+                    <label for="aTitle" class="form-label">Title</label>
+                    <input id="aTitle" class="k-textbox w-100" maxlength="120" />
+                </div>
+                <div class="mb-3">
+                    <label for="aBody" class="form-label">Message</label>
+                    <textarea id="aBody" class="k-textarea w-100" rows="5" maxlength="2000"></textarea>
+                    <div class="small text-muted text-end"><span id="bodyCount">0</span> / 2000</div>
+                </div>
+                <div class="form-grid">
+                    <div>
+                        <label for="aPriority">Priority</label>
+                        <input id="aPriority" style="width: 100%;" />
+                    </div>
+                    <div></div>
+                    <div>
+                        <label for="aStart">Show from</label>
+                        <input id="aStart" style="width: 100%;" />
+                    </div>
+                    <div>
+                        <label for="aEnd">Until (optional)</label>
+                        <input id="aEnd" style="width: 100%;" />
+                    </div>
+                </div>
+                <p class="small text-muted mt-3 mb-2">
+                    Important announcements that start today also appear in every active employee's notifications.
+                </p>
+                <div class="d-flex justify-content-end gap-2">
+                    <button id="aReset" class="btn-outline-orange">Clear</button>
+                    <button id="aSave" class="btn-orange">Post</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="panel">
+                <div class="panel-title">All announcements</div>
+                <div id="annGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+            function ymd(d) { return d ? kendo.toString(d, "yyyy-MM-dd") : ""; }
+
+            var today = new Date(); today.setHours(0, 0, 0, 0);
+            var priority = $("#aPriority").kendoDropDownList({ dataSource: ["Normal", "Important"], value: "Normal" }).data("kendoDropDownList");
+            var start = $("#aStart").kendoDatePicker({ format: "dd-MMM-yyyy", value: today }).data("kendoDatePicker");
+            var end = $("#aEnd").kendoDatePicker({ format: "dd-MMM-yyyy" }).data("kendoDatePicker");
+
+            $("#aBody").on("input", function () { $("#bodyCount").text(this.value.length); });
+
+            var stateClass = { Active: "badge-approved", Upcoming: "badge-pending", Expired: "badge-cancelled" };
+
+            var grid = $("#annGrid").kendoGrid({
+                dataSource: {
+                    transport: { read: { url: "/Admin/Announcements/List", dataType: "json" } },
+                    schema: { model: { id: "announcementId", fields: { startDate: { type: "date" }, endDate: { type: "date", nullable: true } } } },
+                    pageSize: 15
+                },
+                pageable: { buttonCount: 5 },
+                sortable: true,
+                noRecords: { template: "<div class='empty-state'>No announcements yet.</div>" },
+                columns: [
+                    {
+                        field: "title", title: "Title",
+                        template: function (r) {
+                            return kendo.htmlEncode(r.title) +
+                                (r.priority === "Important" ? " <span class='badge-status badge-pending'>Important</span>" : "");
+                        }
+                    },
+                    {
+                        field: "startDate", title: "Shown", width: 190,
+                        template: function (r) {
+                            return kendo.toString(r.startDate, "dd-MMM-yyyy") + (r.endDate ? " – " + kendo.toString(r.endDate, "dd-MMM-yyyy") : " onwards");
+                        }
+                    },
+                    {
+                        field: "state", title: "State", width: 100,
+                        template: function (r) { return "<span class='badge-status " + (stateClass[r.state] || "") + "'>" + r.state + "</span>"; }
+                    },
+                    {
+                        title: "", width: 150,
+                        template: function (r) {
+                            return "<button class='btn-outline-orange btn-sm js-edit' data-id='" + r.announcementId + "'>Edit</button> " +
+                                   "<button class='btn-outline-orange btn-sm js-delete' data-id='" + r.announcementId + "'>Delete</button>";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            function reset() {
+                $("#aId").val("");
+                $("#aTitle").val("");
+                $("#aBody").val("").trigger("input");
+                priority.value("Normal");
+                start.value(today);
+                end.value(null);
+                $("#formTitle").text("New announcement");
+                $("#aSave").text("Post");
+            }
+
+            $("#aReset").on("click", reset);
+
+            $("#annGrid").on("click", ".js-edit", function () {
+                var a = grid.dataSource.get($(this).data("id"));
+                $("#aId").val(a.announcementId);
+                $("#aTitle").val(a.title);
+                $("#aBody").val(a.body).trigger("input");
+                priority.value(a.priority);
+                start.value(a.startDate);
+                end.value(a.endDate);
+                $("#formTitle").text("Edit announcement");
+                $("#aSave").text("Save changes");
+            });
+
+            $("#aSave").on("click", function () {
+                var title = $.trim($("#aTitle").val()), body = $.trim($("#aBody").val());
+                if (!title || !body) { kendo.alert("Please enter a title and a message."); return; }
+                if (!start.value()) { kendo.alert("Please choose a start date."); return; }
+
+                var btn = $(this).prop("disabled", true);
+                $.post("/Admin/Announcements/Save", {
+                    __RequestVerificationToken: token(),
+                    AnnouncementId: $("#aId").val() || null,
+                    Title: title,
+                    Body: body,
+                    Priority: priority.value(),
+                    StartDate: ymd(start.value()),
+                    EndDate: ymd(end.value())
+                }).done(function (res) {
+                    if (!res.success) { kendo.alert(res.message); return; }
+                    reset();
+                    grid.dataSource.read();
+                }).fail(function () {
+                    kendo.alert("Could not save the announcement.");
+                }).always(function () { btn.prop("disabled", false); });
+            });
+
+            $("#annGrid").on("click", ".js-delete", function () {
+                var a = grid.dataSource.get($(this).data("id"));
+                kendo.confirm("Delete \"" + kendo.htmlEncode(a.title) + "\"?").then(function () {
+                    $.post("/Admin/Announcements/Delete", { __RequestVerificationToken: token(), id: a.announcementId })
+                        .done(function (res) { if (!res.success) kendo.alert(res.message); grid.dataSource.read(); })
+                        .fail(function () { kendo.alert("Could not delete the announcement."); });
+                });
+            });
+        });
+    </script>
+}

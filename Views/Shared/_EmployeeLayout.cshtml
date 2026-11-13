@@ -162,6 +162,7 @@
 
         <div id="main-content" class="container-fluid">
             <main role="main" class="pb-3">
+                <div id="announcementBanner"></div>
                 @RenderBody()
             </main>
         </div>
@@ -178,6 +179,7 @@
     <script src="~/lib/kendo/kendo.all.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/notification-bell.js" asp-append-version="true"></script>
+    <script src="~/js/announcements.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
@@ -192,6 +194,8 @@
             
             if (currentPath.includes('/Profile')) {
                 activeKey = 'Profile';
+            } else if (currentPath.toLowerCase().startsWith('/announcements')) {
+                activeKey = 'Announcements';
             } else if (currentPath.toLowerCase().startsWith('/corrections')) {
                 activeKey = 'Corrections';
             } else if (currentPath.toLowerCase().startsWith('/myreport')) {
@@ -218,6 +222,10 @@
                         <li data-role='drawer-item' class='${activeKey === 'Leave' ? 'k-selected' : ''}' data-key='Leave'>
                             <span class='k-icon k-i-calendar'></span>
                             <span class='k-item-text'>Leave</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeKey === 'Announcements' ? 'k-selected' : ''}' data-key='Announcements'>
+                            <span class='k-icon k-i-notification'></span>
+                            <span class='k-item-text'>Announcements</span>
                         </li>
                         <li data-role='drawer-item' class='${activeKey === 'Profile' ? 'k-selected' : ''}' data-key='Profile'>
                             <span class='k-icon k-i-user'></span>
@@ -247,6 +255,9 @@
                             break;
                         case "Leave":
                             window.location.href = '/Leave/Index';
+                            break;
+                        case "Announcements":
+                            window.location.href = '/Announcements/Index';
                             break;
                         case "Profile":
                             window.location.href = '/Profile/Index';

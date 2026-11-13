@@ -15,6 +15,10 @@ employees, review attendance and export reports.
 - **Leave**: request Casual / Sick / Earned / Unpaid leave (full or half
   day), see remaining balance per type, cancel requests, see upcoming holidays
 - **My Report**: monthly attendance %, totals and a day-by-day calendar
+- **Corrections**: ask an admin to fix a missed or wrong check-in/out (last 30 days)
+- **Notifications**: bell with unread count for leave decisions, correction
+  decisions, attendance changes and important announcements
+- **Announcements**: banners from admins, dismissible, plus a full list page
 
 **Admins**
 - Dashboard: active/inactive employees, late or early count, absentees,
@@ -28,6 +32,11 @@ employees, review attendance and export reports.
   absent, leave, hours and attendance %, a calendar per employee, CSV download
 - **Leave Requests**: approve or reject (reason required to reject)
 - **Holidays**: company holiday calendar
+- **Corrections**: review employee correction requests; approving applies
+  the change to attendance
+- **Departments**: create departments, assign employees, filter the
+  monthly report by department
+- **Announcements**: post Normal or Important notices with start/end dates
 - **Audit Log**: every login, account change, attendance edit, leave
   decision and holiday change, searchable by date, action and text
 - Live notifications (via RabbitMQ and Redis) when employees register,
@@ -81,6 +90,10 @@ For an existing database, run the files in `Database/migrations/` in order inste
 | `002_audit_log.sql` | `t_aaudit` |
 | `003_holidays.sql` | `t_aholiday` |
 | `004_leave.sql` | `t_aleave` |
+| `005_notifications.sql` | `t_anotification` |
+| `006_corrections.sql` | `t_acorrection` |
+| `007_departments.sql` | `t_adepartment`, `t_aemployee.c_departmentid` |
+| `008_announcements.sql` | `t_aannouncement` |
 
 ### 2. Configure
 The connection string is **not** stored in `appsettings.json`. The app

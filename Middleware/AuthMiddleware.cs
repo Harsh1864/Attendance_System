@@ -39,6 +39,7 @@ namespace project.Middleware
             "/myreport",
             "/notifications",
             "/corrections",
+            "/announcements",
         };
 
         private readonly RequestDelegate _next;

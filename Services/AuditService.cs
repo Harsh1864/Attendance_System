@@ -37,6 +37,9 @@ namespace project.Services
         public const string DepartmentUpdated = "DepartmentUpdated";
         public const string DepartmentDeleted = "DepartmentDeleted";
         public const string DepartmentMembersChanged = "DepartmentMembersChanged";
+        public const string AnnouncementPosted = "AnnouncementPosted";
+        public const string AnnouncementUpdated = "AnnouncementUpdated";
+        public const string AnnouncementDeleted = "AnnouncementDeleted";
     }
 
     public class AuditService
