@@ -15,6 +15,7 @@ builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<EmployeeViewService>();
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<ProfileUpdateService>();
+builder.Services.Configure<ShiftOptions>(builder.Configuration.GetSection("Shift"));
 builder.Services.AddHostedService<DailyTaskService>();
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMQ"));
 builder.Services.AddSingleton<RabbitMqService>();
