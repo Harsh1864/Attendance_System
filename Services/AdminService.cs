@@ -338,7 +338,8 @@ namespace try_project_casepoint.Services
             SELECT e.c_empid, CURRENT_DATE, NULL, NULL, 'Absent'
             FROM t_aemployee e
             WHERE e.c_status = 'Active'
-              AND e.c_empid != 1         
+              AND e.c_empid != 1
+              AND NOT EXISTS (SELECT 1 FROM t_aholiday h WHERE h.c_date = CURRENT_DATE)
               AND e.c_empid NOT IN (
                   SELECT a.c_empid 
                   FROM t_aattendance a 

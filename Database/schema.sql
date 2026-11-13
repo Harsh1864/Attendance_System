@@ -68,3 +68,14 @@ CREATE TABLE IF NOT EXISTS t_aaudit (
 
 CREATE INDEX IF NOT EXISTS ix_aaudit_createdat ON t_aaudit (c_createdat DESC);
 CREATE INDEX IF NOT EXISTS ix_aaudit_entity    ON t_aaudit (c_entity, c_entityid);
+
+-- ---------------------------------------------------------------------------
+-- Holidays (migration 003)
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS t_aholiday (
+    c_holidayid SERIAL       PRIMARY KEY,
+    c_date      DATE         NOT NULL UNIQUE,
+    c_name      VARCHAR(100) NOT NULL,
+    c_createdby INTEGER      REFERENCES t_aemployee (c_empid) ON DELETE SET NULL,
+    c_createdat TIMESTAMP    NOT NULL DEFAULT NOW()
+);

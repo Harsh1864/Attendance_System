@@ -12,6 +12,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<DbConnectionFactory>();
 builder.Services.AddScoped<AuditService>();
+builder.Services.AddScoped<HolidayService>();
 builder.Services.AddScoped<AuthServices>();
 builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<EmployeeViewService>();
