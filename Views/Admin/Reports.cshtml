@@ -1,0 +1,157 @@
+@{
+    ViewData["Title"] = "Monthly Report";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Monthly Report</h3>
+
+    <div class="filter-bar">
+        <div class="field">
+            <label for="reportMonth">Month</label>
+            <input id="reportMonth" style="width: 180px;" />
+        </div>
+        <button id="reportLoad" class="btn-orange">Show</button>
+        <button id="reportCsv" class="btn-outline-orange">Download CSV</button>
+        <span class="ms-auto text-muted" id="reportInfo"></span>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-tile"><div class="stat-label">Working days</div><div class="stat-value" id="tWorking">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Holidays</div><div class="stat-value" id="tHolidays">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Employees</div><div class="stat-value" id="tEmployees">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Avg attendance</div><div class="stat-value" id="tAttendance">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Late arrivals</div><div class="stat-value" id="tLate">–</div></div>
+        <div class="stat-tile"><div class="stat-label">Total hours</div><div class="stat-value" id="tHours">–</div></div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-title">By employee <span class="text-muted small">(click a row to see each day)</span></div>
+        <div id="reportGrid"></div>
+    </div>
+
+    <div class="panel" id="detailPanel" style="display:none;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="panel-title mb-0" id="detailTitle"></div>
+            <button id="detailClose" class="btn-outline-orange btn-sm">Close</button>
+        </div>
+        <div id="detailCalendar"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/month-calendar.js" asp-append-version="true"></script>
+    <script>
+        $(function () {
+            var now = new Date();
+            var monthPicker = $("#reportMonth").kendoDatePicker({
+                start: "year", depth: "year", format: "MMMM yyyy",
+                value: new Date(now.getFullYear(), now.getMonth(), 1),
+                max: new Date(now.getFullYear(), now.getMonth(), 1)
+            }).data("kendoDatePicker");
+
+            function selected() {
+                var d = monthPicker.value() || now;
+                return { year: d.getFullYear(), month: d.getMonth() + 1 };
+            }
+
+            function pct(v) { return v === null || v === undefined ? "–" : kendo.toString(v, "0.0") + "%"; }
+
+            var grid = $("#reportGrid").kendoGrid({
+                dataSource: {
+                    data: [],
+                    schema: {
+                        model: {
+                            id: "empId",
+                            fields: {
+                                empName: { type: "string" }, workingDays: { type: "number" }, presentDays: { type: "number" },
+                                lateDays: { type: "number" }, earlyOutDays: { type: "number" }, absentDays: { type: "number" },
+                                leaveDays: { type: "number" }, unrecordedDays: { type: "number" }, totalHours: { type: "number" },
+                                averageHours: { type: "number" }, attendancePercent: { type: "number", nullable: true }
+                            }
+                        }
+                    },
+                    sort: { field: "empName", dir: "asc" }
+                },
+                selectable: "row",
+                sortable: true,
+                noRecords: { template: "<div class='empty-state'>No employees for this month.</div>" },
+                change: function () {
+                    var item = this.dataItem(this.select());
+                    if (item) showEmployee(item);
+                },
+                columns: [
+                    {
+                        field: "empName", title: "Employee", width: 180,
+                        template: function (r) {
+                            return kendo.htmlEncode(r.empName) + (r.status !== "Active" ? " <span class='badge-status badge-cancelled'>" + kendo.htmlEncode(r.status) + "</span>" : "");
+                        }
+                    },
+                    { field: "workingDays", title: "Working", width: 85 },
+                    { field: "presentDays", title: "Present", width: 85 },
+                    { field: "lateDays", title: "Late", width: 70 },
+                    { field: "earlyOutDays", title: "Early out", width: 90 },
+                    { field: "absentDays", title: "Absent", width: 80 },
+                    { field: "leaveDays", title: "Leave", width: 75, format: "{0:0.#}" },
+                    { field: "unrecordedDays", title: "No record", width: 95 },
+                    { field: "totalHours", title: "Hours", width: 75 },
+                    { field: "averageHours", title: "Avg h/day", width: 95, format: "{0:0.0}" },
+                    {
+                        field: "attendancePercent", title: "Attendance", width: 160,
+                        template: function (r) {
+                            if (r.attendancePercent === null) return "–";
+                            var p = r.attendancePercent, color = p >= 90 ? "#28a745" : p >= 75 ? "#ff9500" : "#dc3545";
+                            return "<div style='display:flex;align-items:center;gap:6px'>" +
+                                "<div style='flex:1;background:#eee;border-radius:4px;height:8px'>" +
+                                "<div style='width:" + p + "%;background:" + color + ";height:8px;border-radius:4px'></div></div>" +
+                                "<span>" + pct(p) + "</span></div>";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            function load() {
+                var s = selected();
+                $("#detailPanel").hide();
+                $("#reportInfo").text("Loading…");
+                $.getJSON("/Admin/Reports/Monthly", s).done(function (r) {
+                    grid.dataSource.data(r.rows);
+                    $("#tWorking").text(r.workingDays);
+                    $("#tHolidays").text(r.holidays);
+                    $("#tEmployees").text(r.rows.length);
+                    var withPct = r.rows.filter(function (x) { return x.attendancePercent !== null; });
+                    var avg = withPct.length ? withPct.reduce(function (a, x) { return a + x.attendancePercent; }, 0) / withPct.length : null;
+                    $("#tAttendance").text(pct(avg));
+                    $("#tLate").text(r.rows.reduce(function (a, x) { return a + x.lateDays; }, 0));
+                    $("#tHours").text(r.rows.reduce(function (a, x) { return a + x.totalHours; }, 0));
+                    $("#reportInfo").text(r.monthName);
+                }).fail(function (xhr) {
+                    $("#reportInfo").text("");
+                    kendo.alert(xhr.responseText || "Could not load the report.");
+                });
+            }
+
+            function showEmployee(item) {
+                var s = selected();
+                $.getJSON("/Admin/Reports/Employee", { empId: item.empId, year: s.year, month: s.month }).done(function (r) {
+                    $("#detailTitle").text(item.empName + " – " + $("#reportInfo").text());
+                    MonthCalendar.render($("#detailCalendar"), r.days);
+                    $("#detailPanel").show()[0].scrollIntoView({ behavior: "smooth" });
+                });
+            }
+
+            $("#detailClose").on("click", function () { $("#detailPanel").hide(); grid.clearSelection(); });
+            $("#reportLoad").on("click", load);
+            $("#reportCsv").on("click", function () {
+                var s = selected();
+                window.location.href = "/Admin/Reports/MonthlyCsv?year=" + s.year + "&month=" + s.month;
+            });
+
+            load();
+        });
+    </script>
+}

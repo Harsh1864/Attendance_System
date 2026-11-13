@@ -163,3 +163,44 @@
     margin-right: 6px;
     background: var(--swatch);
 }
+
+/* Month calendar (wwwroot/js/month-calendar.js) */
+.mc-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 4px;
+}
+
+.mc-table th {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #777;
+    font-weight: 600;
+}
+
+.mc-day {
+    height: 64px;
+    vertical-align: top;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 4px 6px;
+    cursor: default;
+}
+
+.mc-empty {
+    border: none;
+}
+
+.mc-num {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.mc-sub {
+    font-size: 0.72rem;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

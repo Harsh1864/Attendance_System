@@ -183,6 +183,8 @@
                 activeItem = 'Employee';
             } else if (currentPath.includes('/AdminAttendance')) {
                 activeItem = 'Summary';
+            } else if (currentPath.includes('/Admin/Reports')) {
+                activeItem = 'Reports';
             } else if (currentPath.includes('/Admin/Leave')) {
                 activeItem = 'Leave';
             } else if (currentPath.includes('/Holidays')) {
@@ -206,6 +208,10 @@
                         <li data-role='drawer-item' class='${activeItem === 'Summary' ? 'k-selected' : ''}' data-route='Summary'>
                             <span class='k-icon k-i-calendar'></span>
                             <span class='k-item-text'>Summary</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeItem === 'Reports' ? 'k-selected' : ''}' data-route='Reports'>
+                            <span class='k-icon k-i-chart-column-clustered'></span>
+                            <span class='k-item-text'>Monthly Report</span>
                         </li>
                         <li data-role='drawer-item' class='${activeItem === 'Leave' ? 'k-selected' : ''}' data-route='Leave'>
                             <span class='k-icon k-i-check-outline'></span>
@@ -240,6 +246,9 @@
                             break;
                         case "Summary":
                             window.location.href = '/Admin/AdminAttendance';
+                            break;
+                        case "Reports":
+                            window.location.href = '/Admin/Reports';
                             break;
                         case "Leave":
                             window.location.href = '/Admin/Leave';
