@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "Audit Log";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Audit Log</h3>
+
+    <div class="filter-bar">
+        <div class="field">
+            <label for="auditFrom">From</label>
+            <input id="auditFrom" style="width: 170px;" />
+        </div>
+        <div class="field">
+            <label for="auditTo">To</label>
+            <input id="auditTo" style="width: 170px;" />
+        </div>
+        <div class="field">
+            <label for="auditAction">Action</label>
+            <input id="auditAction" style="width: 220px;" />
+        </div>
+        <div class="field">
+            <label for="auditSearch">Search email or details</label>
+            <input id="auditSearch" class="k-textbox" style="width: 240px;" />
+        </div>
+        <button id="auditApply" class="btn-orange">Apply</button>
+        <button id="auditReset" class="btn-outline-orange">Reset</button>
+    </div>
+
+    <div class="panel">
+        <div id="auditGrid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var actions = [
+                "", "LoginSucceeded", "LoginFailed", "Registered", "PasswordChanged", "ProfileUpdated",
+                "EmployeeUpdated", "EmployeeStatusChanged", "AbsenteeJobRun",
+                "AttendanceCreated", "AttendanceEdited", "AttendanceDeleted",
+                "HolidayAdded", "HolidayRemoved",
+                "LeaveRequested", "LeaveCancelled", "LeaveApproved", "LeaveRejected"
+            ];
+
+            function defaults() {
+                var to = new Date();
+                var from = new Date(); from.setDate(to.getDate() - 6);
+                return { from: from, to: to };
+            }
+
+            var d = defaults();
+            var fromPicker = $("#auditFrom").kendoDatePicker({ format: "dd-MMM-yyyy", value: d.from }).data("kendoDatePicker");
+            var toPicker = $("#auditTo").kendoDatePicker({ format: "dd-MMM-yyyy", value: d.to }).data("kendoDatePicker");
+            var actionList = $("#auditAction").kendoDropDownList({
+                dataSource: actions.map(function (a) { return { text: a || "All actions", value: a }; }),
+                dataTextField: "text",
+                dataValueField: "value"
+            }).data("kendoDropDownList");
+
+            function query() {
+                return {
+                    from: kendo.toString(fromPicker.value(), "yyyy-MM-dd"),
+                    to: kendo.toString(toPicker.value(), "yyyy-MM-dd"),
+                    action: actionList.value(),
+                    search: $("#auditSearch").val()
+                };
+            }
+
+            var grid = $("#auditGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/Admin/GetAuditLog",
+                            dataType: "json",
+                            data: query
+                        }
+                    },
+                    schema: {
+                        model: {
+                            fields: {
+                                createdAt: { type: "date" },
+                                actorEmail: { type: "string" },
+                                action: { type: "string" },
+                                entity: { type: "string" },
+                                entityId: { type: "number" },
+                                details: { type: "string" },
+                                ipAddress: { type: "string" }
+                            }
+                        }
+                    },
+                    pageSize: 25
+                },
+                sortable: true,
+                pageable: { pageSizes: [25, 50, 100], buttonCount: 5 },
+                noRecords: { template: "<div class='empty-state'>No audit entries for these filters.</div>" },
+                columns: [
+                    { field: "createdAt", title: "When", width: 170, format: "{0:dd-MMM-yyyy HH:mm:ss}" },
+                    { field: "actorEmail", title: "Who", width: 200 },
+                    { field: "action", title: "Action", width: 170 },
+                    {
+                        field: "entity", title: "Target", width: 130,
+                        template: function (r) { return kendo.htmlEncode(r.entity) + (r.entityId ? " #" + r.entityId : ""); }
+                    },
+                    { field: "details", title: "Details", encoded: true },
+                    { field: "ipAddress", title: "IP", width: 120 }
+                ]
+            }).data("kendoGrid");
+
+            $("#auditApply").on("click", function () {
+                if (fromPicker.value() > toPicker.value()) {
+                    kendo.alert("'From' must be on or before 'To'.");
+                    return;
+                }
+                grid.dataSource.read();
+            });
+
+            $("#auditSearch").on("keydown", function (e) {
+                if (e.key === "Enter") $("#auditApply").click();
+            });
+
+            $("#auditReset").on("click", function () {
+                var d = defaults();
+                fromPicker.value(d.from);
+                toPicker.value(d.to);
+                actionList.value("");
+                $("#auditSearch").val("");
+                grid.dataSource.read();
+            });
+        });
+    </script>
+}

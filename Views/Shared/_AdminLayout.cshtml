@@ -183,6 +183,8 @@
                 activeItem = 'Employee';
             } else if (currentPath.includes('/AdminAttendance')) {
                 activeItem = 'Summary';
+            } else if (currentPath.includes('/AuditLog')) {
+                activeItem = 'AuditLog';
             }
 
             // Initialize Kendo Drawer
@@ -200,6 +202,10 @@
                         <li data-role='drawer-item' class='${activeItem === 'Summary' ? 'k-selected' : ''}' data-route='Summary'>
                             <span class='k-icon k-i-calendar'></span>
                             <span class='k-item-text'>Summary</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeItem === 'AuditLog' ? 'k-selected' : ''}' data-route='AuditLog'>
+                            <span class='k-icon k-i-track-changes'></span>
+                            <span class='k-item-text'>Audit Log</span>
                         </li>
                         <li data-role='drawer-item' data-route='RunAttendance'>
                            <span class='k-icon k-i-clock'></span>
@@ -222,6 +228,9 @@
                             break;
                         case "Summary":
                             window.location.href = '/Admin/AdminAttendance';
+                            break;
+                        case "AuditLog":
+                            window.location.href = '/Admin/AuditLog';
                             break;
                         case "RunAttendance":
                             runAttendance();
