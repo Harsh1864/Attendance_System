@@ -191,6 +191,8 @@
             
             if (currentPath.includes('/Profile')) {
                 activeKey = 'Profile';
+            } else if (currentPath.toLowerCase().startsWith('/leave')) {
+                activeKey = 'Leave';
             }
 
             $("#drawer").kendoDrawer({
@@ -199,6 +201,10 @@
                         <li data-role='drawer-item' class='${activeKey === 'Home' ? 'k-selected' : ''}' data-key='Home'>
                             <span class='k-icon k-i-home'></span>
                             <span class='k-item-text'>Home</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeKey === 'Leave' ? 'k-selected' : ''}' data-key='Leave'>
+                            <span class='k-icon k-i-calendar'></span>
+                            <span class='k-item-text'>Leave</span>
                         </li>
                         <li data-role='drawer-item' class='${activeKey === 'Profile' ? 'k-selected' : ''}' data-key='Profile'>
                             <span class='k-icon k-i-user'></span>
@@ -219,6 +225,9 @@
                     switch (key) {
                         case "Home":
                             window.location.href = homeUrl;
+                            break;
+                        case "Leave":
+                            window.location.href = '/Leave/Index';
                             break;
                         case "Profile":
                             window.location.href = '/Profile/Index';

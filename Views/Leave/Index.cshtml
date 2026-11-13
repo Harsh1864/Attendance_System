@@ -1,0 +1,226 @@
+@{
+    ViewData["Title"] = "My Leave";
+    Layout = "../Shared/_EmployeeLayout.cshtml";
+    var leaveTypes = (string[])ViewBag.LeaveTypes;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">My Leave</h3>
+
+    <div class="stat-row" id="balanceTiles"></div>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="panel">
+                <div class="panel-title">Request leave</div>
+                <div class="form-grid">
+                    <div>
+                        <label for="leaveType">Type</label>
+                        <select id="leaveType" style="width: 100%;">
+                            @foreach (var t in leaveTypes)
+                            {
+                                <option value="@t">@t</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="d-flex align-items-end">
+                        <label class="d-flex align-items-center gap-2 mb-1">
+                            <input type="checkbox" id="halfDay" class="k-checkbox" />
+                            Half day
+                        </label>
+                    </div>
+                    <div>
+                        <label for="fromDate">From</label>
+                        <input id="fromDate" style="width: 100%;" />
+                    </div>
+                    <div>
+                        <label for="toDate">To</label>
+                        <input id="toDate" style="width: 100%;" />
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label for="reason" class="form-label">Reason (optional)</label>
+                    <textarea id="reason" class="k-textarea w-100" rows="3" maxlength="500"></textarea>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="text-muted small" id="dayPreview"></span>
+                    <button id="applyLeave" class="btn-orange">Submit request</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Upcoming holidays</div>
+                <ul class="list-unstyled mb-0" id="holidayList"></ul>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="panel">
+                <div class="panel-title">My requests</div>
+                <div id="leaveGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+            function ymd(d) { return kendo.toString(d, "yyyy-MM-dd"); }
+            function badge(status) {
+                return "<span class='badge-status badge-" + status.toLowerCase() + "'>" + kendo.htmlEncode(status) + "</span>";
+            }
+
+            var today = new Date(); today.setHours(0, 0, 0, 0);
+            var typeList = $("#leaveType").kendoDropDownList({ change: onTypeChange }).data("kendoDropDownList");
+            var fromPicker = $("#fromDate").kendoDatePicker({ format: "dd-MMM-yyyy", value: today, min: today, change: onFromChange }).data("kendoDatePicker");
+            var toPicker = $("#toDate").kendoDatePicker({ format: "dd-MMM-yyyy", value: today, min: today, change: preview }).data("kendoDatePicker");
+
+            function onTypeChange() {
+                // Sick leave may be reported up to 7 days afterwards.
+                var min = new Date(today);
+                if (typeList.value() === "Sick") min.setDate(min.getDate() - 7);
+                fromPicker.min(min);
+                toPicker.min(min);
+                preview();
+            }
+
+            function onFromChange() {
+                var from = fromPicker.value();
+                if (from) {
+                    toPicker.min(from);
+                    if (!toPicker.value() || toPicker.value() < from || $("#halfDay").is(":checked")) toPicker.value(from);
+                }
+                preview();
+            }
+
+            $("#halfDay").on("change", function () {
+                if (this.checked) toPicker.value(fromPicker.value());
+                toPicker.enable(!this.checked);
+                preview();
+            });
+
+            function preview() {
+                var from = fromPicker.value(), to = toPicker.value();
+                if (!from || !to || to < from) { $("#dayPreview").text(""); return; }
+                $.getJSON("/Leave/CountDays", { from: ymd(from), to: ymd(to), halfDay: $("#halfDay").is(":checked") })
+                    .done(function (r) {
+                        $("#dayPreview").text(r.days === 0
+                            ? "No working days in this range."
+                            : r.days + " working day(s), excluding weekends and holidays.");
+                    });
+            }
+
+            function loadBalances() {
+                $.getJSON("/Leave/Balance").done(function (rows) {
+                    var html = rows.map(function (b) {
+                        var value = b.allowance === null ? "&infin;" : kendo.toString(b.remaining, "0.#");
+                        var sub = b.allowance === null
+                            ? kendo.toString(b.approved, "0.#") + " used"
+                            : kendo.toString(b.approved, "0.#") + " used, " + kendo.toString(b.pending, "0.#") + " pending of " + kendo.toString(b.allowance, "0.#");
+                        return "<div class='stat-tile'><div class='stat-label'>" + kendo.htmlEncode(b.leaveType) + " left</div>" +
+                               "<div class='stat-value'>" + value + "</div><div class='small text-muted'>" + sub + "</div></div>";
+                    }).join("");
+                    $("#balanceTiles").html(html);
+                });
+            }
+
+            function loadHolidays() {
+                $.getJSON("/Leave/UpcomingHolidays").done(function (rows) {
+                    if (!rows.length) { $("#holidayList").html("<li class='text-muted'>No upcoming holidays.</li>"); return; }
+                    $("#holidayList").html(rows.map(function (h) {
+                        var d = kendo.parseDate(h.date);
+                        return "<li class='d-flex justify-content-between border-bottom py-1'><span>" + kendo.htmlEncode(h.name) +
+                               "</span><span class='text-muted'>" + kendo.toString(d, "ddd, dd MMM yyyy") + "</span></li>";
+                    }).join(""));
+                });
+            }
+
+            var grid = $("#leaveGrid").kendoGrid({
+                dataSource: {
+                    transport: { read: { url: "/Leave/Mine", dataType: "json" } },
+                    schema: {
+                        model: {
+                            id: "leaveId",
+                            fields: {
+                                fromDate: { type: "date" }, toDate: { type: "date" }, createdAt: { type: "date" },
+                                days: { type: "number" }, leaveType: { type: "string" }, status: { type: "string" }
+                            }
+                        }
+                    },
+                    pageSize: 10
+                },
+                pageable: { buttonCount: 5 },
+                sortable: true,
+                noRecords: { template: "<div class='empty-state'>You have not requested any leave yet.</div>" },
+                columns: [
+                    { field: "leaveType", title: "Type", width: 90 },
+                    {
+                        field: "fromDate", title: "Dates", width: 190,
+                        template: function (r) {
+                            var a = kendo.toString(r.fromDate, "dd-MMM-yyyy"), b = kendo.toString(r.toDate, "dd-MMM-yyyy");
+                            return a === b ? a + (r.halfDay ? " (half)" : "") : a + " &ndash; " + b;
+                        }
+                    },
+                    { field: "days", title: "Days", width: 70, format: "{0:0.#}" },
+                    { field: "status", title: "Status", width: 110, template: function (r) { return badge(r.status); } },
+                    {
+                        title: "Note", template: function (r) {
+                            var parts = [];
+                            if (r.reason) parts.push("<div>" + kendo.htmlEncode(r.reason) + "</div>");
+                            if (r.reviewNote) parts.push("<div class='text-muted small'>Reviewer: " + kendo.htmlEncode(r.reviewNote) + "</div>");
+                            return parts.join("");
+                        }
+                    },
+                    {
+                        title: "", width: 100, template: function (r) {
+                            var canCancel = r.status === "Pending" || (r.status === "Approved" && r.fromDate > today);
+                            return canCancel ? "<button class='btn-outline-orange btn-sm js-cancel' data-id='" + r.leaveId + "'>Cancel</button>" : "";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            function refresh() { grid.dataSource.read(); loadBalances(); }
+
+            $("#applyLeave").on("click", function () {
+                var from = fromPicker.value(), to = toPicker.value();
+                if (!from || !to) { kendo.alert("Please choose the dates."); return; }
+                var btn = $(this).prop("disabled", true);
+                $.post("/Leave/Apply", {
+                    __RequestVerificationToken: token(),
+                    FromDate: ymd(from),
+                    ToDate: ymd(to),
+                    LeaveType: typeList.value(),
+                    HalfDay: $("#halfDay").is(":checked"),
+                    Reason: $("#reason").val()
+                }).done(function (res) {
+                    kendo.alert(res.message);
+                    if (res.success) { $("#reason").val(""); refresh(); }
+                }).fail(function () {
+                    kendo.alert("Could not submit the request.");
+                }).always(function () { btn.prop("disabled", false); });
+            });
+
+            $("#leaveGrid").on("click", ".js-cancel", function () {
+                var id = $(this).data("id");
+                kendo.confirm("Cancel this leave request?").then(function () {
+                    $.post("/Leave/Cancel", { __RequestVerificationToken: token(), id: id })
+                        .done(function (res) { if (!res.success) kendo.alert(res.message); refresh(); })
+                        .fail(function () { kendo.alert("Could not cancel the request."); });
+                });
+            });
+
+            refresh();
+            loadHolidays();
+            preview();
+        });
+    </script>
+}
