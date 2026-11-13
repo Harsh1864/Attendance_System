@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "Attendance Corrections";
+    Layout = "../Shared/_EmployeeLayout.cshtml";
+    var workTypes = (string[])ViewBag.WorkTypes;
+    var maxDaysBack = (int)ViewBag.MaxDaysBack;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Attendance Corrections</h3>
+
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="panel">
+                <div class="panel-title">Request a correction</div>
+                <p class="text-muted small">
+                    Forgot to check in or out, or the time is wrong? Ask an admin to fix it.
+                    You can ask for any day in the last @maxDaysBack days.
+                </p>
+                <div class="form-grid">
+                    <div style="grid-column: 1 / -1;">
+                        <label for="cDate">Date</label>
+                        <input id="cDate" style="width: 100%;" />
+                    </div>
+                    <div>
+                        <label for="cIn">Clock in</label>
+                        <input id="cIn" style="width: 100%;" />
+                    </div>
+                    <div>
+                        <label for="cOut">Clock out</label>
+                        <input id="cOut" style="width: 100%;" />
+                    </div>
+                    <div>
+                        <label for="cWork">Work type</label>
+                        <select id="cWork" style="width: 100%;">
+                            @foreach (var w in workTypes)
+                            {
+                                <option value="@w">@w</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="cTasks">Tasks</label>
+                        <input id="cTasks" class="k-textbox" maxlength="100" style="width: 100%;" placeholder="Optional" />
+                    </div>
+                    <div style="grid-column: 1 / -1;">
+                        <label for="cReason">What happened? <span class="text-danger">*</span></label>
+                        <textarea id="cReason" class="k-textarea w-100" rows="3" maxlength="300"
+                                  placeholder="e.g. Was in a client meeting and forgot to check out"></textarea>
+                    </div>
+                </div>
+                <div class="text-end mt-3">
+                    <button id="cSubmit" class="btn-orange">Send request</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="panel">
+                <div class="panel-title">My requests</div>
+                <div id="corrGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+            function badge(s) { return "<span class='badge-status badge-" + s.toLowerCase() + "'>" + kendo.htmlEncode(s) + "</span>"; }
+
+            var today = new Date(); today.setHours(0, 0, 0, 0);
+            var earliest = new Date(today); earliest.setDate(today.getDate() - @maxDaysBack);
+            var yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+
+            var datePicker = $("#cDate").kendoDatePicker({ format: "dd-MMM-yyyy", value: yesterday, min: earliest, max: today }).data("kendoDatePicker");
+            var inPicker = $("#cIn").kendoTimePicker({ format: "HH:mm", interval: 15, value: kendo.parseDate("09:00", "HH:mm") }).data("kendoTimePicker");
+            var outPicker = $("#cOut").kendoTimePicker({ format: "HH:mm", interval: 15, value: kendo.parseDate("17:00", "HH:mm") }).data("kendoTimePicker");
+            var workList = $("#cWork").kendoDropDownList().data("kendoDropDownList");
+
+            var grid = $("#corrGrid").kendoGrid({
+                dataSource: {
+                    transport: { read: { url: "/Corrections/Mine", dataType: "json" } },
+                    schema: { model: { id: "correctionId", fields: { date: { type: "date" }, createdAt: { type: "date" } } } },
+                    pageSize: 10
+                },
+                pageable: { buttonCount: 5 },
+                sortable: true,
+                noRecords: { template: "<div class='empty-state'>No correction requests yet.</div>" },
+                columns: [
+                    { field: "date", title: "Date", width: 120, format: "{0:dd-MMM-yyyy}" },
+                    {
+                        title: "Requested", width: 130,
+                        template: function (r) { return kendo.htmlEncode(r.clockIn + "–" + (r.clockOut || "--:--") + " " + r.workType); }
+                    },
+                    { field: "currentRecord", title: "Current record", width: 150, template: function (r) { return kendo.htmlEncode(r.currentRecord || "None"); } },
+                    {
+                        field: "status", title: "Status", width: 150,
+                        template: function (r) {
+                            var html = badge(r.status);
+                            if (r.reviewNote) html += "<div class='small text-muted'>" + kendo.htmlEncode(r.reviewNote) + "</div>";
+                            return html;
+                        }
+                    },
+                    {
+                        title: "", width: 90,
+                        template: function (r) {
+                            return r.status === "Pending"
+                                ? "<button class='btn-outline-orange btn-sm js-cancel' data-id='" + r.correctionId + "'>Cancel</button>"
+                                : "";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            $("#cSubmit").on("click", function () {
+                var reason = $.trim($("#cReason").val());
+                if (!datePicker.value()) { kendo.alert("Please choose a date."); return; }
+                if (!inPicker.value()) { kendo.alert("Please enter the clock-in time."); return; }
+                if (!reason) { kendo.alert("Please explain what happened."); return; }
+
+                var btn = $(this).prop("disabled", true);
+                $.post("/Corrections/Submit", {
+                    __RequestVerificationToken: token(),
+                    Date: kendo.toString(datePicker.value(), "yyyy-MM-dd"),
+                    ClockIn: kendo.toString(inPicker.value(), "HH:mm"),
+                    ClockOut: outPicker.value() ? kendo.toString(outPicker.value(), "HH:mm") : "",
+                    WorkType: workList.value(),
+                    TaskType: $("#cTasks").val(),
+                    Reason: reason
+                }).done(function (res) {
+                    kendo.alert(res.message);
+                    if (res.success) { $("#cReason").val(""); $("#cTasks").val(""); grid.dataSource.read(); }
+                }).fail(function () {
+                    kendo.alert("Could not send the request.");
+                }).always(function () { btn.prop("disabled", false); });
+            });
+
+            $("#corrGrid").on("click", ".js-cancel", function () {
+                var id = $(this).data("id");
+                kendo.confirm("Cancel this correction request?").then(function () {
+                    $.post("/Corrections/Cancel", { __RequestVerificationToken: token(), id: id })
+                        .done(function (res) { if (!res.success) kendo.alert(res.message); grid.dataSource.read(); })
+                        .fail(function () { kendo.alert("Could not cancel the request."); });
+                });
+            });
+        });
+    </script>
+}

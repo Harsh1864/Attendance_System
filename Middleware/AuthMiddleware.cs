@@ -38,6 +38,7 @@ namespace project.Middleware
             "/leave",
             "/myreport",
             "/notifications",
+            "/corrections",
         };
 
         private readonly RequestDelegate _next;

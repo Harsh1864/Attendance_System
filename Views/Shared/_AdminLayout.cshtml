@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -184,6 +184,8 @@
                 activeItem = 'Employee';
             } else if (currentPath.includes('/AdminAttendance')) {
                 activeItem = 'Summary';
+            } else if (currentPath.includes('/Admin/Corrections')) {
+                activeItem = 'Corrections';
             } else if (currentPath.includes('/Admin/AttendanceEdit')) {
                 activeItem = 'AttendanceEdit';
             } else if (currentPath.includes('/Admin/Reports')) {
@@ -211,6 +213,10 @@
                         <li data-role='drawer-item' class='${activeItem === 'Summary' ? 'k-selected' : ''}' data-route='Summary'>
                             <span class='k-icon k-i-calendar'></span>
                             <span class='k-item-text'>Summary</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeItem === 'Corrections' ? 'k-selected' : ''}' data-route='Corrections'>
+                            <span class='k-icon k-i-clock'></span>
+                            <span class='k-item-text'>Corrections</span>
                         </li>
                         <li data-role='drawer-item' class='${activeItem === 'AttendanceEdit' ? 'k-selected' : ''}' data-route='AttendanceEdit'>
                             <span class='k-icon k-i-edit'></span>
@@ -253,6 +259,9 @@
                             break;
                         case "Summary":
                             window.location.href = '/Admin/AdminAttendance';
+                            break;
+                        case "Corrections":
+                            window.location.href = '/Admin/Corrections';
                             break;
                         case "AttendanceEdit":
                             window.location.href = '/Admin/AttendanceEdit';

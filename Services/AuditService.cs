@@ -29,6 +29,10 @@ namespace project.Services
         public const string LeaveCancelled = "LeaveCancelled";
         public const string LeaveApproved = "LeaveApproved";
         public const string LeaveRejected = "LeaveRejected";
+        public const string CorrectionRequested = "CorrectionRequested";
+        public const string CorrectionCancelled = "CorrectionCancelled";
+        public const string CorrectionApproved = "CorrectionApproved";
+        public const string CorrectionRejected = "CorrectionRejected";
     }
 
     public class AuditService

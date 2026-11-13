@@ -192,6 +192,8 @@
             
             if (currentPath.includes('/Profile')) {
                 activeKey = 'Profile';
+            } else if (currentPath.toLowerCase().startsWith('/corrections')) {
+                activeKey = 'Corrections';
             } else if (currentPath.toLowerCase().startsWith('/myreport')) {
                 activeKey = 'MyReport';
             } else if (currentPath.toLowerCase().startsWith('/leave')) {
@@ -208,6 +210,10 @@
                         <li data-role='drawer-item' class='${activeKey === 'MyReport' ? 'k-selected' : ''}' data-key='MyReport'>
                             <span class='k-icon k-i-chart-column-clustered'></span>
                             <span class='k-item-text'>My Report</span>
+                        </li>
+                        <li data-role='drawer-item' class='${activeKey === 'Corrections' ? 'k-selected' : ''}' data-key='Corrections'>
+                            <span class='k-icon k-i-clock'></span>
+                            <span class='k-item-text'>Corrections</span>
                         </li>
                         <li data-role='drawer-item' class='${activeKey === 'Leave' ? 'k-selected' : ''}' data-key='Leave'>
                             <span class='k-icon k-i-calendar'></span>
@@ -235,6 +241,9 @@
                             break;
                         case "MyReport":
                             window.location.href = '/MyReport/Index';
+                            break;
+                        case "Corrections":
+                            window.location.href = '/Corrections/Index';
                             break;
                         case "Leave":
                             window.location.href = '/Leave/Index';

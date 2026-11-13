@@ -1,0 +1,134 @@
+@{
+    ViewData["Title"] = "Correction Requests";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/pages.css" asp-append-version="true" />
+}
+
+<form id="af">@Html.AntiForgeryToken()</form>
+
+<div class="container mt-4">
+    <h3 class="text-center page-title">Correction Requests</h3>
+
+    <div class="filter-bar">
+        <div class="field">
+            <label for="crStatus">Status</label>
+            <input id="crStatus" style="width: 160px;" />
+        </div>
+        <div class="field">
+            <label for="crFrom">From</label>
+            <input id="crFrom" style="width: 170px;" />
+        </div>
+        <div class="field">
+            <label for="crTo">To</label>
+            <input id="crTo" style="width: 170px;" />
+        </div>
+        <button id="crApply" class="btn-orange">Apply</button>
+        <span class="ms-auto text-muted" id="crPending"></span>
+    </div>
+
+    <div class="panel">
+        <div id="crGrid"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            function token() { return $("#af input[name='__RequestVerificationToken']").val(); }
+            function ymd(d) { return kendo.toString(d, "yyyy-MM-dd"); }
+            function badge(s) { return "<span class='badge-status badge-" + s.toLowerCase() + "'>" + kendo.htmlEncode(s) + "</span>"; }
+
+            var today = new Date();
+            var from = new Date(); from.setDate(today.getDate() - 30);
+
+            var statusList = $("#crStatus").kendoDropDownList({
+                dataSource: ["Pending", "Approved", "Rejected", "Cancelled", ""].map(function (s) { return { text: s || "All", value: s }; }),
+                dataTextField: "text", dataValueField: "value", value: "Pending"
+            }).data("kendoDropDownList");
+            var fromPicker = $("#crFrom").kendoDatePicker({ format: "dd-MMM-yyyy", value: from }).data("kendoDatePicker");
+            var toPicker = $("#crTo").kendoDatePicker({ format: "dd-MMM-yyyy", value: today }).data("kendoDatePicker");
+
+            var grid = $("#crGrid").kendoGrid({
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/Admin/Corrections/List", dataType: "json",
+                            data: function () { return { status: statusList.value(), from: ymd(fromPicker.value()), to: ymd(toPicker.value()) }; }
+                        }
+                    },
+                    schema: { model: { id: "correctionId", fields: { date: { type: "date" }, createdAt: { type: "date" } } } },
+                    pageSize: 20
+                },
+                sortable: true,
+                pageable: { pageSizes: [20, 50, 100], buttonCount: 5 },
+                noRecords: { template: "<div class='empty-state'>No correction requests for these filters.</div>" },
+                columns: [
+                    { field: "empName", title: "Employee", width: 160 },
+                    { field: "date", title: "Date", width: 120, format: "{0:dd-MMM-yyyy}" },
+                    { field: "currentRecord", title: "Current", width: 150, template: function (r) { return kendo.htmlEncode(r.currentRecord || "No record"); } },
+                    {
+                        title: "Requested", width: 150,
+                        template: function (r) {
+                            return kendo.htmlEncode(r.clockIn + "–" + (r.clockOut || "--:--") + " " + r.workType) +
+                                (r.taskType ? "<div class='small text-muted'>" + kendo.htmlEncode(r.taskType) + "</div>" : "");
+                        }
+                    },
+                    { field: "reason", title: "Reason", encoded: true },
+                    {
+                        field: "status", title: "Status", width: 150,
+                        template: function (r) {
+                            var html = badge(r.status);
+                            if (r.reviewedByName) html += "<div class='small text-muted'>by " + kendo.htmlEncode(r.reviewedByName) + "</div>";
+                            if (r.reviewNote) html += "<div class='small text-muted'>" + kendo.htmlEncode(r.reviewNote) + "</div>";
+                            return html;
+                        }
+                    },
+                    {
+                        title: "", width: 180,
+                        template: function (r) {
+                            if (r.status !== "Pending") return "";
+                            return "<button class='btn-orange btn-sm js-review' data-id='" + r.correctionId + "' data-decision='approve'>Approve</button> " +
+                                   "<button class='btn-outline-orange btn-sm js-review' data-id='" + r.correctionId + "' data-decision='reject'>Reject</button>";
+                        }
+                    }
+                ]
+            }).data("kendoGrid");
+
+            function refresh() {
+                grid.dataSource.read();
+                $.getJSON("/Admin/Corrections/PendingCount").done(function (r) {
+                    $("#crPending").text(r.count === 0 ? "No requests waiting." : r.count + " request(s) waiting for review.");
+                });
+            }
+
+            function send(id, decision, note) {
+                $.post("/Admin/Corrections/Review", { __RequestVerificationToken: token(), id: id, decision: decision, note: note })
+                    .done(function (res) { if (!res.success) kendo.alert(res.message); refresh(); })
+                    .fail(function () { kendo.alert("Could not save the decision."); });
+            }
+
+            $("#crGrid").on("click", ".js-review", function () {
+                var id = $(this).data("id"), decision = $(this).data("decision");
+                var item = grid.dataSource.get(id);
+                var what = kendo.htmlEncode(item.empName) + " on " + kendo.toString(item.date, "dd-MMM-yyyy");
+                if (decision === "approve") {
+                    kendo.confirm("Approve and apply the correction for " + what + "? This replaces the current record.")
+                        .then(function () { send(id, "approve", ""); });
+                } else {
+                    kendo.prompt("Reject the correction for " + what + ". Reason:", "")
+                        .then(function (note) {
+                            note = $.trim(note || "");
+                            if (!note) { kendo.alert("Please give a reason when rejecting."); return; }
+                            send(id, "reject", note);
+                        });
+                }
+            });
+
+            $("#crApply").on("click", refresh);
+            refresh();
+        });
+    </script>
+}

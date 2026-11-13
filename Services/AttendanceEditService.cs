@@ -58,6 +58,17 @@ namespace project.Services
             return list.Count > 0 ? list[0] : null;
         }
 
+        /// <summary>The id of the employee's record on a date, or null if there is none.</summary>
+        public async Task<int?> FindIdAsync(int empId, DateTime date)
+        {
+            await using var conn = await _db.OpenAsync();
+            await using var cmd = new NpgsqlCommand(
+                "SELECT c_attendid FROM t_aattendance WHERE c_empid = @emp AND c_attenddate = @date LIMIT 1;", conn);
+            cmd.Parameters.AddWithValue("emp", NpgsqlDbType.Integer, empId);
+            cmd.Parameters.AddWithValue("date", NpgsqlDbType.Date, date.Date);
+            return await cmd.ExecuteScalarAsync() is int id ? id : null;
+        }
+
         public async Task<bool> IsEditableEmployeeAsync(int empId)
         {
             await using var conn = await _db.OpenAsync();
