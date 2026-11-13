@@ -203,7 +203,7 @@ namespace try_project_casepoint.Services
             List<EmployeeModel> employeeList = new List<EmployeeModel>();
             try
             {
-                string query = @"SELECT c_empid, c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role 
+                string query = @"SELECT c_empid, c_name, c_email, c_gender, c_status, c_profileimage, c_role 
                                  FROM t_aemployee ORDER BY c_name ASC";
                 using (var cmd = new NpgsqlCommand(query, _conn))
                 {
@@ -219,7 +219,6 @@ namespace try_project_casepoint.Services
                                 EmpId = Convert.ToInt32(reader["c_empid"]),
                                 EmpName = reader["c_name"].ToString(),
                                 EmpMail = reader["c_email"].ToString(),
-                                EmpPassword = reader["c_password"].ToString(),
                                 Gender = reader["c_gender"].ToString(),
                                 Status = reader["c_status"].ToString(),
                                 Profile = reader["c_profileimage"] == DBNull.Value ? null : reader["c_profileimage"].ToString(),
@@ -376,7 +375,7 @@ namespace try_project_casepoint.Services
             List<EmployeeModel> employeeList = new List<EmployeeModel>();
             try
             {
-                string query = @"SELECT c_empid, c_name, c_email, c_password, c_gender, c_status, c_profileimage, c_role 
+                string query = @"SELECT c_empid, c_name, c_email, c_gender, c_status, c_profileimage, c_role 
                                  FROM t_aemployee 
                                  WHERE c_role != 'Admin' AND c_status = @status ORDER BY c_name ASC";
 
@@ -396,7 +395,6 @@ namespace try_project_casepoint.Services
                                 EmpId = Convert.ToInt32(reader["c_empid"]),
                                 EmpName = reader["c_name"].ToString(),
                                 EmpMail = reader["c_email"].ToString(),
-                                EmpPassword = reader["c_password"].ToString(),
                                 Gender = reader["c_gender"].ToString(),
                                 Status = reader["c_status"].ToString(),
                                 Profile = reader["c_profileimage"] == DBNull.Value ? null : reader["c_profileimage"].ToString(),
